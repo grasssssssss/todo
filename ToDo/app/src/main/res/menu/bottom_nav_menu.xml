@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_note"
+        android:icon="@drawable/ic_note"
+        android:title="Note" />
+    <item
+        android:id="@+id/menu_todo"
+        android:icon="@drawable/ic_todo"
+        android:title="To-Do" />
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+    <item
+        android:id="@+id/menu_calender"
+        android:icon="@drawable/ic_calendar"
+        android:title="Calender" />
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_setting"
+        android:title="Settings" />
+</menu>

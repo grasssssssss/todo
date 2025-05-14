@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NoActiveIndicator">
+        <item name="android:color">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    <style name="VerticalDivider">
+        <item name="android:layout_width">2dp</item>
+        <item name="android:layout_height">100dp</item>
+        <item name="android:layout_gravity">end</item>
+        <item name="android:background">#DDD</item>
+    </style>
+    <style name="CalendarDayColumn">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+    <style name="CalendarEventLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">15dp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+</resources>

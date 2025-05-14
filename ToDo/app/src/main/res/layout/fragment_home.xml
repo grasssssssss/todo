@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF2F2"
+    tools:context=".home">
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginLeft="-5dp"
+        android:layout_marginTop="-80dp"
+        android:alpha="0.3"
+        app:tint="#FF6584"
+        android:src="@drawable/white_circle" />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginLeft="-90dp"
+        android:layout_marginTop="-30dp"
+        android:alpha="0.4"
+        app:tint="#FF6584"
+        android:src="@drawable/white_circle" />
+
+    <!-- 主內容 ScrollView -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:paddingBottom="80dp">
+
+            <!-- ✅ Card 1: 今日代辦事項 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Good Afternoon, Abi"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="今日代辦事項"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp" />
+
+                    <!-- 所有待辦清單直接列出來 -->
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp">
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="12:00 練習寫程式" android:layout_marginStart="8dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="14:00 健身" android:layout_marginStart="8dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="16:00 吃下午茶" android:layout_marginStart="8dp"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ✅ Card 2: 行事曆 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- 標題與 + 號 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="行事曆"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" 2025年3月"
+                            android:textSize="14sp"
+                            android:layout_marginStart="4dp" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+"
+                            android:textSize="24sp"
+                            android:textColor="#F48FB1"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- 星期 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp">
+
+                        <!-- 重複7次 -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="日"
+                            android:gravity="center"
+                            android:textSize="12sp" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="一" android:gravity="center" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="二" android:gravity="center" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="三" android:gravity="center" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="四" android:gravity="center" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="五" android:gravity="center" android:textSize="12sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="六" android:gravity="center" android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <!-- 日期 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="4dp">
+
+                        <!-- 假設今天是 20 號 -->
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="16" android:textSize="12sp" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="17" android:textSize="12sp" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="18" android:textSize="12sp" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="19" android:textSize="12sp" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="20"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:background="#D59CAE" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="21" android:textSize="12sp" />
+
+                        <TextView android:layout_width="0dp" android:layout_height="32dp"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="22" android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- 行程 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="4dp">
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                            <TextView
+                                style="@style/CalendarEventLabel"
+                                android:background="#D59CAE"
+                                android:text="報告" />
+
+                            <TextView
+                                style="@style/CalendarEventLabel"
+                                android:background="#A9C3DC"
+                                android:text="會議" />
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                            <TextView
+                                style="@style/CalendarEventLabel"
+                                android:background="#B59CAE"
+                                android:text="吃飯" />
+
+                            <TextView
+                                style="@style/CalendarEventLabel"
+                                android:background="#D59CAE"
+                                android:text="睡覺" />
+
+                            <TextView
+                                style="@style/CalendarEventLabel"
+                                android:background="#A9C3DC"
+                                android:text="打東東" />
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                        </LinearLayout>
+
+                        <View style="@style/VerticalDivider" />
+
+                        <LinearLayout style="@style/CalendarDayColumn">
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- ✅ Card 3: 隨手記 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="隨手記 2025年3月20號"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- 表情圖示 -->
+                        <LinearLayout
+                            android:layout_width="159dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:gravity="end"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_mood1" />
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_mood2" />
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_mood3" />
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_mood4" />
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_mood5" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="15dp"
+                            android:text="寫點什麼吧……"
+                            android:textColor="#888888" />
+
+                    </LinearLayout>
+                </ScrollView>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
