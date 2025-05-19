@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,8 +58,36 @@ public class note extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_note, container, false);
+    Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_note, container, false);
+
+        ImageView[] moods = {
+                view.findViewById(R.id.mood1),
+                view.findViewById(R.id.mood2),
+                view.findViewById(R.id.mood3),
+                view.findViewById(R.id.mood4),
+                view.findViewById(R.id.mood5)
+        };
+
+        String[] moodColors = {
+                "#73BF00",
+                "#FFD700",
+                "#FF8000",
+                "#FF0000",
+                "#DDA0DD"
+        };
+
+        for (int i = 0; i < moods.length; i++) {
+            final int selectedIndex = i;
+            moods[i].setOnClickListener(v -> {
+                for (ImageView mood : moods) {
+                    mood.setColorFilter(null); // 清除之前的上色
+                }
+                moods[selectedIndex].setColorFilter(android.graphics.Color.parseColor(moodColors[selectedIndex]));
+            });
+        }
+
+        return view;
     }
+
 }
