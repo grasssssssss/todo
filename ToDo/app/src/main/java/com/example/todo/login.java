@@ -1,6 +1,7 @@
 package com.example.todo;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -10,7 +11,9 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -18,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class login extends AppCompatActivity {
 
@@ -70,11 +75,45 @@ public class login extends AppCompatActivity {
 
 
 
-        TextView login = findViewById(R.id.button_login);//登入
-        login.setOnClickListener(v -> {
-            Intent intent = new Intent(login.this, main.class);
-            startActivity(intent);
+        TextView loginButton = findViewById(R.id.button_login);
+        loginButton.setOnClickListener(v -> {
+            String email = ((EditText)findViewById(R.id.editTextText)).getText().toString().trim();
+            String password = ((EditText)findViewById(R.id.editTextText2)).getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "請輸入帳號與密碼", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            db.collection("users")
+                    .whereEqualTo("email", email)
+                    .whereEqualTo("password", password)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            // 登入成功，取出暱稱
+                            String nickname = queryDocumentSnapshots.getDocuments().get(0).getString("nickname");
+                            Toast.makeText(this, "歡迎回來 " + nickname, Toast.LENGTH_SHORT).show();
+
+                            SharedPreferences prefs = getSharedPreferences("user", MODE_PRIVATE);
+                            prefs.edit().putString("nickname", nickname).apply();
+
+
+                            // 跳轉到 main 活動
+                            Intent intent = new Intent(login.this, main.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(this, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "登入失敗：" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         });
+
 
     }
 }

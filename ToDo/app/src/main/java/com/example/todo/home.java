@@ -1,5 +1,7 @@
 package com.example.todo;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,7 +61,17 @@ public class home extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        // 讀取 SharedPreferences 中的 nickname
+        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String nickname = prefs.getString("nickname", "使用者");
+
+        // 找到 TextView 並修改內容
+        TextView greetingText = view.findViewById(R.id.text_greeting);
+        greetingText.setText("Good Afternoon, " + nickname);
+
+        return view;
     }
+
 }

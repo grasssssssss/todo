@@ -73,7 +73,7 @@
         android:background="@drawable/rounded_edittext"
         android:ems="10"
         android:hint="輸入您的密碼"
-        android:inputType="text"
+        android:inputType="textPassword"
         android:textColor="@android:color/black"
         android:textColorHint="#A9A9A9"
         app:layout_constraintEnd_toEndOf="parent"
