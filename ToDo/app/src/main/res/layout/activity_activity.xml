@@ -7,180 +7,192 @@
     android:layout_height="match_parent"
     tools:context=".Activity">
 
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:alpha="0.3"
-            android:src="@drawable/white_circle"
-            app:tint="#FF6584"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:translationX="300dp"
-            android:translationY="-10dp" />
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:alpha="0.3"
+        android:src="@drawable/white_circle"
+        app:tint="#FF6584"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:translationX="300dp"
+        android:translationY="-10dp" />
 
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:alpha="0.4"
-            android:src="@drawable/white_circle"
-            app:tint="#FF6584"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:translationX="240dp"
-            android:translationY="-78dp" />
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:alpha="0.4"
+        android:src="@drawable/white_circle"
+        app:tint="#FF6584"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:translationX="240dp"
+        android:translationY="-78dp" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_margin="24dp"
-            android:background="#FFFFFF"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
+        android:background="#FFFFFF"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-            <ScrollView
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:padding="20dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fillViewport="true"
-                android:padding="20dp">
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
+                <!-- 顏色選擇列 -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
 
-                    <!-- 顏色選擇列 -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/color_blue"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/blue" />
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/blue" />
+                    <ImageView
+                        android:id="@+id/color_red"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/red" />
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/red" />
+                    <ImageView
+                        android:id="@+id/color_purp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/purple" />
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/purple" />
+                    <ImageView
+                        android:id="@+id/color_yellow"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/yellow" />
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/yellow" />
+                    <ImageView
+                        android:id="@+id/color_orange"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/orange" />
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/orange" />
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/white_circle"
-                            app:tint="@color/green" />
-
-                    </LinearLayout>
-
-                    <!-- 標題 -->
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:hint="標題"
-                        android:paddingHorizontal="16dp"
-                        android:textColorHint="#BDBDBD" />
-
-                    <!-- 時間 -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:text="18:00 - 19:00　3月14日 星期五"
-                        android:textColor="#000000" />
-
-                    <!-- 通知 -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:text="沒有通知"
-                        android:textColor="#BDBDBD" />
-
-                    <!-- 重複 -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:text="不要重複"
-                        android:textColor="#BDBDBD" />
-
-                    <!-- 地點 -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
-                        android:text="沒有地點"
-                        android:textColor="#BDBDBD" />
-
-                    <!-- 備註 -->
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="top|start"
-                        android:hint="備註"
-                        android:padding="16dp"
-                        android:textColorHint="#BDBDBD" />
-
-                    <!-- 儲存按鈕 -->
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:backgroundTint="#FF6584"
-                        android:text="儲存"
-                        android:textColor="#FFFFFF" />
+                    <ImageView
+                        android:id="@+id/color_green"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/white_circle"
+                        app:tint="@color/green" />
 
                 </LinearLayout>
-            </ScrollView>
-        </androidx.cardview.widget.CardView>
+
+                    <!-- 標題 -->
+                <EditText
+                    android:id="@+id/ed_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="標題"
+                    android:paddingHorizontal="16dp"
+                    android:textColorHint="#BDBDBD" />
+
+                <!-- 時間 -->
+                <TextView
+                    android:id="@+id/ed_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="center_vertical"
+                    android:hint="活動時間"
+                    android:paddingHorizontal="16dp"
+                    android:textColor="#000000" />
+
+                <!-- 通知 -->
+                <TextView
+                    android:id="@+id/ed_notificatetion"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="沒有通知"
+                    android:textColor="#BDBDBD" />
+
+                <!-- 重複 -->
+                <TextView
+                    android:id="@+id/ed_repeat"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="不要重複"
+                    android:textColor="#BDBDBD" />
+
+                <!-- 地點 -->
+                <TextView
+                    android:id="@+id/ed_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="沒有地點"
+                    android:textColor="#BDBDBD" />
+
+                <!-- 備註 -->
+                <EditText
+                    android:id="@+id/ed_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="top|start"
+                    android:hint="備註"
+                    android:padding="16dp"
+                    android:textColorHint="#BDBDBD" />
+
+                <!-- 儲存按鈕 -->
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="#FF6584"
+                    android:text="儲存"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
