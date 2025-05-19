@@ -24,9 +24,9 @@ public class Activity extends AppCompatActivity {
         storeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 這邊做資料儲存
+                // 資料儲存
 
-                // 然後回到上一頁
+                // 回到上一頁
                 finish();
             }
         });
