@@ -1,2 +1,9 @@
+pluginManagement {
+    repositories {
+        google() // 🔧 加入這一行很重要
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 rootProject.name = "ToDo"
 include ':app'
