@@ -47,6 +47,7 @@ dependencies {
     implementation('com.prolificinteractive:material-calendarview:1.4.3') {
         exclude group: 'com.android.support'
     }
+    implementation libs.activity
 
 
     testImplementation 'junit:junit:4.13.2'
