@@ -99,6 +99,7 @@ public class login extends AppCompatActivity {
 
                             SharedPreferences prefs = getSharedPreferences("user", MODE_PRIVATE);
                             prefs.edit().putString("nickname", nickname).apply();
+                            prefs.edit().putString("useremail", email).apply();
 
 
                             // 跳轉到 main 活動
