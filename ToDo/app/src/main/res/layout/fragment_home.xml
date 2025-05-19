@@ -148,11 +148,12 @@
                             android:layout_weight="1" />
 
                         <TextView
+                            android:id="@+id/text_add"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="+"
-                            android:textSize="24sp"
                             android:textColor="#F48FB1"
+                            android:textSize="24sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 

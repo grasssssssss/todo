@@ -1,6 +1,7 @@
 package com.example.todo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -31,14 +32,6 @@ public class home extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment home.
-     */
     // TODO: Rename and change types and number of parameters
     public static home newInstance(String param1, String param2) {
         home fragment = new home();
@@ -71,7 +64,18 @@ public class home extends Fragment {
         TextView greetingText = view.findViewById(R.id.text_greeting);
         greetingText.setText("Good Afternoon, " + nickname);
 
+        TextView addActivity = view.findViewById(R.id.text_add);
+        addActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), Activity.class);
+                startActivity(intent);
+            }
+        });
+
         return view;
     }
+
+
 
 }
