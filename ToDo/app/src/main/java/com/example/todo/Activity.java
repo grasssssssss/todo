@@ -60,6 +60,9 @@ public class Activity extends AppCompatActivity {
         //notification
         findViewById(R.id.ed_notificatetion).setOnClickListener(v -> showReminderDialog());
 
+        //repeat
+        findViewById(R.id.ed_repeat).setOnClickListener(v -> showRepeatPickerDialog());
+
         //Store
         Button storeButton = findViewById(R.id.btn_store);
         storeButton.setOnClickListener(new View.OnClickListener() {
@@ -215,6 +218,7 @@ public class Activity extends AppCompatActivity {
         dialog.show();
     }
 
+    //Notification Picker
     private void showReminderDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_notification_picker, null);
 
@@ -321,6 +325,37 @@ public class Activity extends AppCompatActivity {
         }
     }
 
+    //Repeat Picker
+    private void showRepeatPickerDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_repeat_picker, null);
 
+        NumberPicker repeatPicker = dialogView.findViewById(R.id.repeatPicker);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btnConfirm);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        String[] repeatOptions = {
+                "每天", "每兩天", "每三天", "每五天", "每週", "每十天",
+                "每十五天", "每二十天", "每月", "每兩月", "每年"
+        };
+
+        repeatPicker.setMinValue(0);
+        repeatPicker.setMaxValue(repeatOptions.length - 1);
+        repeatPicker.setDisplayedValues(repeatOptions);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            String selected = repeatOptions[repeatPicker.getValue()];
+            TextView edRepeat = findViewById(R.id.ed_repeat); // 顯示在你原本的欄位
+            edRepeat.setText(selected);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
 
 }
