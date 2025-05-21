@@ -1,5 +1,6 @@
 package com.example.todo;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -16,6 +17,8 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -24,12 +27,15 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
-
 public class Activity extends AppCompatActivity {
+
+    private final ArrayList<String> reminderList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +55,9 @@ public class Activity extends AppCompatActivity {
                 showTimePickerDialog();
             }
         });
+
+        //notification
+        findViewById(R.id.ed_notificatetion).setOnClickListener(v -> showReminderDialog());
 
         //Store
         Button storeButton = findViewById(R.id.btn_store);
@@ -185,5 +194,100 @@ public class Activity extends AppCompatActivity {
 
         dialog.show();
     }
+
+    private void showReminderDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_notification_picker, null);
+
+        NumberPicker datePicker = dialogView.findViewById(R.id.datePicker);
+        NumberPicker hourPicker = dialogView.findViewById(R.id.hourPicker);
+        NumberPicker minPicker = dialogView.findViewById(R.id.minPicker);
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnAdd = dialogView.findViewById(R.id.btnAdd);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        // 日期提醒選項
+        String[] dateOptions = {"當天", "提前一天", "提前兩天", "提前三天"};
+        datePicker.setMinValue(0);
+        datePicker.setMaxValue(dateOptions.length - 1);
+        datePicker.setDisplayedValues(dateOptions);
+
+        // 小時 0 ~ 23
+        hourPicker.setMinValue(0);
+        hourPicker.setMaxValue(23);
+
+        // 分鐘 0 ~ 59
+        minPicker.setMinValue(0);
+        minPicker.setMaxValue(59);
+
+        // 按鈕事件
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnAdd.setOnClickListener(v -> {
+            String when = dateOptions[datePicker.getValue()];
+            int hour = hourPicker.getValue();
+            int min = minPicker.getValue();
+
+            String reminder = when + " " + String.format("%02d:%02d", hour, min);
+
+            // 檢查是否重複
+            if (reminderList.contains(reminder)) {
+                Toast.makeText(this, "已存在相同提醒", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // 新增到清單
+            reminderList.add(reminder);
+
+            // 排序（使用 24hr 制排序）
+            Collections.sort(reminderList, (r1, r2) -> {
+                String[] parts1 = r1.split(" ");
+                String[] parts2 = r2.split(" ");
+                return timeToMinutes(parts1[1]) - timeToMinutes(parts2[1]);
+            });
+
+            // 重新繪製畫面
+            renderReminders();
+
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+    private int timeToMinutes(String time) {
+        String[] parts = time.split(":");
+        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+    }
+    private void renderReminders() {
+        LinearLayout container = findViewById(R.id.reminder_container);
+        container.removeAllViews(); // 清除舊的
+
+        for (String reminder : reminderList) {
+            TextView tv = new TextView(this);
+            tv.setText("✓ " + reminder);
+            tv.setTextSize(16);
+            tv.setTextColor(Color.BLACK);
+            tv.setPadding(8, 8, 8, 8);
+
+            // 長按刪除
+            tv.setOnLongClickListener(v -> {
+                new AlertDialog.Builder(this)
+                        .setTitle("刪除提醒")
+                        .setMessage("確定要刪除這筆提醒嗎？")
+                        .setPositiveButton("刪除", (dialog, which) -> {
+                            reminderList.remove(reminder);
+                            renderReminders();
+                        })
+                        .setNegativeButton("取消", null)
+                        .show();
+                return true;
+            });
+
+            container.addView(tv);
+        }
+    }
+
 
 }

@@ -157,10 +157,16 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/edittext_background"
                     android:gravity="center_vertical"
-                    android:hint="沒有通知"
+                    android:hint="新增通知"
                     android:paddingHorizontal="16dp"
                     android:textColor="@color/black"
                     android:textColorHint="@color/gray" />
+                <LinearLayout
+                    android:id="@+id/reminder_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="8dp"/>
 
                 <!-- 重複 -->
                 <TextView
@@ -193,7 +199,7 @@
                 <EditText
                     android:id="@+id/ed_hint"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="70dp"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/edittext_background"
                     android:gravity="top|start"
