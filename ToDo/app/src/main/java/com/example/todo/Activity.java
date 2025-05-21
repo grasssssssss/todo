@@ -1,5 +1,9 @@
 package com.example.todo;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -35,6 +39,27 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Activity extends AppCompatActivity {
+    public static class activity{
+        private String title;
+        private String startDate;
+        private String endDate;
+        private Boolean holeDay;
+        private String startTime;
+        private String endTime;
+        private int repeat;
+        private String location;
+        private String hint;
+
+        public String getTitle(){return title;}
+        public String getStartDate(){return startDate;}
+        public String getEndDate(){return endDate;}
+        public Boolean getHoleDay(){return holeDay;}
+        public String getStartTime(){return startTime;}
+        public String getEndTime(){return endTime;}
+        public int getRepeat(){return repeat;}
+        public String getLocation(){return location;}
+        public String getHint(){return hint;}
+    }
 
     private final ArrayList<String> reminderList = new ArrayList<>();
 
@@ -69,6 +94,9 @@ public class Activity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // 資料儲存
+                // 從 SharedPreferences 讀取 userEmail
+                SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+                String userEmail = prefs.getString("useremail", "使用者");
 
                 // 回到上一頁
                 finish();
