@@ -29,6 +29,17 @@ public class login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ✅ 檢查是否已登入
+        SharedPreferences prefs = getSharedPreferences("user", MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
+        if (isLoggedIn) {
+            Intent intent = new Intent(this, main.class);
+            startActivity(intent);
+            finish(); // 不讓使用者回到 login 頁面
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -37,10 +48,7 @@ public class login extends AppCompatActivity {
             return insets;
         });
 
-
-
         TextView text_no_account = findViewById(R.id.text_no_account);
-
         String text = "還沒有帳號嗎?  註冊";
         SpannableString spannableString = new SpannableString(text);
         int start = text.indexOf("註冊");
@@ -64,21 +72,16 @@ public class login extends AppCompatActivity {
         text_no_account.setText(spannableString);
         text_no_account.setMovementMethod(LinkMovementMethod.getInstance());
 
-
-
-
-        TextView forgetPassword = findViewById(R.id.text_forget_password); //忘記密碼
+        TextView forgetPassword = findViewById(R.id.text_forget_password);
         forgetPassword.setOnClickListener(v -> {
             Intent intent = new Intent(login.this, ForgetPassword.class);
             startActivity(intent);
         });
 
-
-
         TextView loginButton = findViewById(R.id.button_login);
         loginButton.setOnClickListener(v -> {
-            String email = ((EditText)findViewById(R.id.editTextText)).getText().toString().trim();
-            String password = ((EditText)findViewById(R.id.editTextText2)).getText().toString().trim();
+            String email = ((EditText) findViewById(R.id.editTextText)).getText().toString().trim();
+            String password = ((EditText) findViewById(R.id.editTextText2)).getText().toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "請輸入帳號與密碼", Toast.LENGTH_SHORT).show();
@@ -86,23 +89,22 @@ public class login extends AppCompatActivity {
             }
 
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-
             db.collection("users")
                     .whereEqualTo("email", email)
                     .whereEqualTo("password", password)
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            // 登入成功，取出暱稱
                             String nickname = queryDocumentSnapshots.getDocuments().get(0).getString("nickname");
                             Toast.makeText(this, "歡迎回來 " + nickname, Toast.LENGTH_SHORT).show();
 
-                            SharedPreferences prefs = getSharedPreferences("user", MODE_PRIVATE);
-                            prefs.edit().putString("nickname", nickname).apply();
-                            prefs.edit().putString("useremail", email).apply();
+                            // ✅ 記錄登入狀態
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("nickname", nickname);
+                            editor.putString("useremail", email);
+                            editor.putBoolean("isLoggedIn", true);
+                            editor.apply();
 
-
-                            // 跳轉到 main 活動
                             Intent intent = new Intent(login.this, main.class);
                             startActivity(intent);
                             finish();
@@ -114,7 +116,5 @@ public class login extends AppCompatActivity {
                         Toast.makeText(this, "登入失敗：" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
-
-
     }
 }

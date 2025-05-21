@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -78,6 +79,7 @@ public class Activity extends AppCompatActivity {
         });
     }
 
+    //Date Picker
     private void showManualDateInputDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_date_picker, null);
 
@@ -160,37 +162,55 @@ public class Activity extends AppCompatActivity {
         });
     }
 
-
+    //Time Picker
     private void showTimePickerDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_time_picker, null);
         TimePicker startPicker = dialogView.findViewById(R.id.startTimePicker);
         TimePicker endPicker = dialogView.findViewById(R.id.endTimePicker);
+        SwitchCompat allDaySwitch = dialogView.findViewById(R.id.switch_all_day);
+        Button btnConfirm = dialogView.findViewById(R.id.btnConfirm);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
 
-        Button btnConfirm = dialogView.findViewById(R.id.btnConfirm);
-        btnConfirm.setOnClickListener(v -> {
-            int startHour = startPicker.getHour();
-            int startMin = startPicker.getMinute();
-            int endHour = endPicker.getHour();
-            int endMin = endPicker.getMinute();
+        // 初始化 edTime 控制
+        TextView edTime = findViewById(R.id.ed_time);
 
-            String timeString = String.format("%02d:%02d - %02d:%02d", startHour, startMin, endHour, endMin);
-            TextView edTime = findViewById(R.id.ed_time);
-            edTime.setText(timeString);
+        // 確認按鈕邏輯
+        btnConfirm.setOnClickListener(v -> {
+            if (allDaySwitch.isChecked()) {
+                edTime.setText("全天");
+            } else {
+                int startHour = startPicker.getHour();
+                int startMin = startPicker.getMinute();
+                int endHour = endPicker.getHour();
+                int endMin = endPicker.getMinute();
+
+                String timeString = String.format("%02d:%02d - %02d:%02d", startHour, startMin, endHour, endMin);
+                edTime.setText(timeString);
+            }
 
             dialog.dismiss();
         });
 
-        SwitchCompat allDaySwitch = dialogView.findViewById(R.id.switch_all_day);
-
+        // 當切換「全天」時，控制時間選擇器的可用狀態
         allDaySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             startPicker.setEnabled(!isChecked);
             endPicker.setEnabled(!isChecked);
-        });
 
+            if (isChecked) {
+                edTime.setText("全天");
+            } else {
+                // 預設顯示目前選的時間
+                int startHour = startPicker.getHour();
+                int startMin = startPicker.getMinute();
+                int endHour = endPicker.getHour();
+                int endMin = endPicker.getMinute();
+                String timeString = String.format("%02d:%02d - %02d:%02d", startHour, startMin, endHour, endMin);
+                edTime.setText(timeString);
+            }
+        });
 
         dialog.show();
     }
@@ -262,32 +282,45 @@ public class Activity extends AppCompatActivity {
     }
     private void renderReminders() {
         LinearLayout container = findViewById(R.id.reminder_container);
-        container.removeAllViews(); // 清除舊的
+        container.removeAllViews(); // 清除原本的提醒
 
         for (String reminder : reminderList) {
+            // 外層一行（橫向）
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(8, 8, 8, 8);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+
+            // 按 ❌ 刪除
+            TextView deleteBtn = new TextView(this);
+            deleteBtn.setText("❌");
+            deleteBtn.setTextSize(18);
+            deleteBtn.setTextColor(Color.RED);
+            deleteBtn.setPadding(8, 0, 16, 0);
+
+            // 加點點擊感覺
+            deleteBtn.setClickable(true);
+            deleteBtn.setFocusable(true);
+
+            // 提醒文字
             TextView tv = new TextView(this);
-            tv.setText("✓ " + reminder);
+            tv.setText(reminder);
             tv.setTextSize(16);
             tv.setTextColor(Color.BLACK);
-            tv.setPadding(8, 8, 8, 8);
 
-            // 長按刪除
-            tv.setOnLongClickListener(v -> {
-                new AlertDialog.Builder(this)
-                        .setTitle("刪除提醒")
-                        .setMessage("確定要刪除這筆提醒嗎？")
-                        .setPositiveButton("刪除", (dialog, which) -> {
-                            reminderList.remove(reminder);
-                            renderReminders();
-                        })
-                        .setNegativeButton("取消", null)
-                        .show();
-                return true;
+            // 刪除
+            deleteBtn.setOnClickListener(v -> {
+                reminderList.remove(reminder);
+                renderReminders();
             });
 
-            container.addView(tv);
+            // 加入 row -> 加入容器
+            row.addView(deleteBtn);
+            row.addView(tv);
+            container.addView(row);
         }
     }
+
 
 
 }
