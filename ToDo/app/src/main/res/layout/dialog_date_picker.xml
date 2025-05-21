@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    android:background="@drawable/dialog_background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="選擇活動開始日期"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="12dp" />
+
+    <!-- 開始日期輸入 -->
+    <EditText
+        android:id="@+id/et_start_date"
+        android:layout_width="176dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/edittext_background"
+        android:hint="MM/DD/YYYY"
+        android:inputType="date"
+        android:padding="12dp" />
+
+    <!-- 結束日期輸入 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="選擇活動結束日期"
+        android:textSize="16sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="12dp" />
+    <EditText
+        android:id="@+id/et_end_date"
+        android:layout_width="176dp"
+        android:layout_height="wrap_content"
+        android:hint="MM/DD/YYYY"
+        android:inputType="date"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/edittext_background"
+        android:padding="12dp"/>
+
+    <Button
+        android:id="@+id/btnConfirmDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="確定"
+        android:backgroundTint="#FF6584"
+        android:textColor="@android:color/white" />
+</LinearLayout>

@@ -119,9 +119,22 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/edittext_background"
                     android:hint="標題"
+                    android:gravity="center_vertical"
                     android:paddingHorizontal="16dp"
                     android:textColorHint="@color/gray"
                     android:textColor="@color/black"/>
+
+                <TextView
+                    android:id="@+id/ed_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/edittext_background"
+                    android:gravity="center_vertical"
+                    android:hint="活動日期"
+                    android:paddingHorizontal="16dp"
+                    android:textColorHint="@color/gray"
+                    android:textColor="@color/black" />
 
                 <!-- 時間 -->
                 <TextView
@@ -163,7 +176,7 @@
                     android:textColorHint="@color/gray" />
 
                 <!-- 地點 -->
-                <TextView
+                <EditText
                     android:id="@+id/ed_location"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -173,27 +186,29 @@
                     android:hint="沒有地點"
                     android:paddingHorizontal="16dp"
                     android:textColor="@color/black"
-                    android:textColorHint="@color/gray" />
+                    android:textColorHint="@color/gray"
+                    android:textSize="14sp" />
 
                 <!-- 備註 -->
                 <EditText
                     android:id="@+id/ed_hint"
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
+                    android:layout_height="100dp"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/edittext_background"
                     android:gravity="top|start"
                     android:hint="備註"
                     android:padding="16dp"
+                    android:textColor="@color/black"
                     android:textColorHint="@color/gray"
-                    android:textColor="@color/black" />
+                    android:textSize="14sp" />
 
                 <!-- 儲存按鈕 -->
                 <Button
                     android:id="@+id/btn_store"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
                     android:backgroundTint="#FF6584"
                     android:text="儲存"
                     android:textColor="@color/white" />
