@@ -1,61 +1,42 @@
 package com.example.todo;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.*;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.Insets;
-import androidx.core.util.Pair;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
-import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 public class Activity extends AppCompatActivity {
-    public static class activity{
-        private String userEmail;
-        private String color;
-        private String title;
-        private String startDate;
-        private String endDate;
-        private Boolean holeDay;
-        private String startTime;
-        private String endTime;
-        private int repeat;
-        private String location;
-        private String hint;
 
-        public activity(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay, String startTime, String endTime, int repeat, String location, String hint){
+    // Firebase 資料模型
+    public static class ScheduleActivity {
+        private String userEmail, color, title, startDate, endDate, startTime, endTime, location, hint;
+        private Boolean holeDay;
+        private int repeat;
+
+        public ScheduleActivity() {} // Firebase 用的無參建構子
+
+        public ScheduleActivity(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay,
+                                String startTime, String endTime, int repeat, String location, String hint) {
             this.userEmail = userEmail;
             this.color = color;
             this.title = title;
@@ -68,26 +49,12 @@ public class Activity extends AppCompatActivity {
             this.location = location;
             this.hint = hint;
         }
-
-        public String getUserEmail(){return userEmail;}
-        public String getColor(){return color;}
-        public String getTitle(){return title;}
-        public String getStartDate(){return startDate;}
-        public String getEndDate(){return endDate;}
-        public Boolean getHoleDay(){return holeDay;}
-        public String getStartTime(){return startTime;}
-        public String getEndTime(){return endTime;}
-        public int getRepeat(){return repeat;}
-        public String getLocation(){return location;}
-        public String getHint(){return hint;}
     }
 
     private final ArrayList<String> reminderList = new ArrayList<>();
-    private String selectedColor = "blue"; // 預設顏色
+    private String selectedColor = "blue";
     private ImageView lastSelectedColorView = null;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    public activity() {} // Firebase 用的無參數 constructor
-
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,102 +62,63 @@ public class Activity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_activity);
 
-        //Color
-        ImageView blue = findViewById(R.id.color_blue);
-        ImageView red = findViewById(R.id.color_red);
-        ImageView purple = findViewById(R.id.color_purp);
-        ImageView yellow = findViewById(R.id.color_yellow);
-        ImageView orange = findViewById(R.id.color_orange);
-        ImageView green = findViewById(R.id.color_green);
-        setColorSelectListener(blue, "blue");
-        setColorSelectListener(red, "red");
-        setColorSelectListener(purple, "purple");
-        setColorSelectListener(yellow, "yellow");
-        setColorSelectListener(orange, "orange");
-        setColorSelectListener(green, "green");
+        // 顏色選擇器
+        setColorSelectListener(findViewById(R.id.color_blue), "blue");
+        setColorSelectListener(findViewById(R.id.color_red), "red");
+        setColorSelectListener(findViewById(R.id.color_purp), "purple");
+        setColorSelectListener(findViewById(R.id.color_yellow), "yellow");
+        setColorSelectListener(findViewById(R.id.color_orange), "orange");
+        setColorSelectListener(findViewById(R.id.color_green), "green");
 
-        //Date
-        TextView edDate = findViewById(R.id.ed_date);
-        edDate.setOnClickListener(v -> showManualDateInputDialog());
-
-        //Time
-        TextView edTime = findViewById(R.id.ed_time);
-        edTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimePickerDialog();
-            }
-        });
-
-        //notification
+        // 日期 / 時間 / 通知 / 重複
+        findViewById(R.id.ed_date).setOnClickListener(v -> showManualDateInputDialog());
+        findViewById(R.id.ed_time).setOnClickListener(v -> showTimePickerDialog());
         findViewById(R.id.ed_notificatetion).setOnClickListener(v -> showReminderDialog());
-
-        //repeat
         findViewById(R.id.ed_repeat).setOnClickListener(v -> showRepeatPickerDialog());
 
-        //Store
-        Button storeButton = findViewById(R.id.btn_store);
-        storeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // read email
-                SharedPreferences prefs = getSharedPreferences("user", Context.MODE_PRIVATE);
-                String userEmail = prefs.getString("useremail", "使用者");
-
-                // read color
-                String color = getSelectedColor();
-                String title = ((EditText) findViewById(R.id.ed_title)).getText().toString().trim();
-
-                //read dates
-                String dateRange = ((TextView) findViewById(R.id.ed_date)).getText().toString();
-                String[] dates = dateRange.split(" - ");
-                String startDate = dates[0];
-                String endDate = dates.length > 1 ? dates[1] : dates[0];
-
-                //read time (hole day)
-                String timeRange = ((TextView) findViewById(R.id.ed_time)).getText().toString();
-                Boolean holeDay = timeRange.equals("全天");
-                String startTime = holeDay ? null : timeRange.split(" - ")[0];
-                String endTime = holeDay ? null : timeRange.split(" - ")[1];
-
-                //repeat
-                String repeatStr = ((TextView) findViewById(R.id.ed_repeat)).getText().toString();
-                int repeat = repeatStrToCode(repeatStr); // to int
-
-                //location
-                String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
-                String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
-
-                // build activity
-                activity newActivity = new activity(
-                        userEmail, color, title, startDate, endDate,
-                        holeDay, startTime, endTime, repeat, location, hint
-                );
-
-                // Firebase
-                db.collection("activities")
-                        .add(newActivity)
-                        .addOnSuccessListener(documentReference -> {
-                            Log.d("Firebase", "活動已儲存，ID: " + documentReference.getId());
-                            Toast.makeText(Activity.this, "活動已儲存", Toast.LENGTH_SHORT).show();
-                            finish(); // 回上頁
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e("Firebase", "儲存失敗", e);
-                            Toast.makeText(Activity.this, "儲存失敗", Toast.LENGTH_SHORT).show();
-                        });
-
-                // 回到上一頁
-                finish();
-            }
-        });
-
+        // 儲存按鈕
+        findViewById(R.id.btn_store).setOnClickListener(v -> saveActivity());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void saveActivity() {
+        SharedPreferences prefs = getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("useremail", "使用者");
+
+        String color = selectedColor;
+        String title = ((EditText) findViewById(R.id.ed_title)).getText().toString().trim();
+
+        String dateRange = ((TextView) findViewById(R.id.ed_date)).getText().toString();
+        String[] dates = dateRange.split(" - ");
+        String startDate = dates[0];
+        String endDate = dates.length > 1 ? dates[1] : dates[0];
+
+        String timeRange = ((TextView) findViewById(R.id.ed_time)).getText().toString();
+        boolean holeDay = timeRange.equals("全天");
+        String startTime = holeDay ? null : timeRange.split(" - ")[0];
+        String endTime = holeDay ? null : timeRange.split(" - ")[1];
+
+        int repeat = repeatStrToCode(((TextView) findViewById(R.id.ed_repeat)).getText().toString());
+        String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
+        String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
+
+        ScheduleActivity act = new ScheduleActivity(userEmail, color, title, startDate, endDate, holeDay, startTime, endTime, repeat, location, hint);
+
+        db.collection("activities")
+                .add(act)
+                .addOnSuccessListener(docRef -> {
+                    Toast.makeText(this, "活動已儲存", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "儲存失敗", Toast.LENGTH_SHORT).show();
+                    Log.e("Firebase", "Error saving", e);
+                });
     }
 
     //Color Picker
@@ -502,6 +430,4 @@ public class Activity extends AppCompatActivity {
             default: return 0;
         }
     }
-
-
 }

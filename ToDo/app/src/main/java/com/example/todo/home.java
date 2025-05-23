@@ -68,7 +68,7 @@ public class home extends Fragment {
         addActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), Activity.class);
+                Intent intent = new Intent(getActivity(), Activity.ScheduleActivity.class);
                 startActivity(intent);
             }
         });
