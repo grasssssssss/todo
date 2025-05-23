@@ -18,10 +18,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -29,6 +31,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +43,8 @@ import java.util.Locale;
 
 public class Activity extends AppCompatActivity {
     public static class activity{
+        private String userEmail;
+        private String color;
         private String title;
         private String startDate;
         private String endDate;
@@ -50,6 +55,22 @@ public class Activity extends AppCompatActivity {
         private String location;
         private String hint;
 
+        public activity(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay, String startTime, String endTime, int repeat, String location, String hint){
+            this.userEmail = userEmail;
+            this.color = color;
+            this.title = title;
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.holeDay = holeDay;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.repeat = repeat;
+            this.location = location;
+            this.hint = hint;
+        }
+
+        public String getUserEmail(){return userEmail;}
+        public String getColor(){return color;}
         public String getTitle(){return title;}
         public String getStartDate(){return startDate;}
         public String getEndDate(){return endDate;}
@@ -62,12 +83,31 @@ public class Activity extends AppCompatActivity {
     }
 
     private final ArrayList<String> reminderList = new ArrayList<>();
+    private String selectedColor = "blue"; // 預設顏色
+    private ImageView lastSelectedColorView = null;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public activity() {} // Firebase 用的無參數 constructor
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_activity);
+
+        //Color
+        ImageView blue = findViewById(R.id.color_blue);
+        ImageView red = findViewById(R.id.color_red);
+        ImageView purple = findViewById(R.id.color_purp);
+        ImageView yellow = findViewById(R.id.color_yellow);
+        ImageView orange = findViewById(R.id.color_orange);
+        ImageView green = findViewById(R.id.color_green);
+        setColorSelectListener(blue, "blue");
+        setColorSelectListener(red, "red");
+        setColorSelectListener(purple, "purple");
+        setColorSelectListener(yellow, "yellow");
+        setColorSelectListener(orange, "orange");
+        setColorSelectListener(green, "green");
 
         //Date
         TextView edDate = findViewById(R.id.ed_date);
@@ -93,21 +133,82 @@ public class Activity extends AppCompatActivity {
         storeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 資料儲存
-                // 從 SharedPreferences 讀取 userEmail
-                SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+                // read email
+                SharedPreferences prefs = getSharedPreferences("user", Context.MODE_PRIVATE);
                 String userEmail = prefs.getString("useremail", "使用者");
+
+                // read color
+                String color = getSelectedColor();
+                String title = ((EditText) findViewById(R.id.ed_title)).getText().toString().trim();
+
+                //read dates
+                String dateRange = ((TextView) findViewById(R.id.ed_date)).getText().toString();
+                String[] dates = dateRange.split(" - ");
+                String startDate = dates[0];
+                String endDate = dates.length > 1 ? dates[1] : dates[0];
+
+                //read time (hole day)
+                String timeRange = ((TextView) findViewById(R.id.ed_time)).getText().toString();
+                Boolean holeDay = timeRange.equals("全天");
+                String startTime = holeDay ? null : timeRange.split(" - ")[0];
+                String endTime = holeDay ? null : timeRange.split(" - ")[1];
+
+                //repeat
+                String repeatStr = ((TextView) findViewById(R.id.ed_repeat)).getText().toString();
+                int repeat = repeatStrToCode(repeatStr); // to int
+
+                //location
+                String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
+                String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
+
+                // build activity
+                activity newActivity = new activity(
+                        userEmail, color, title, startDate, endDate,
+                        holeDay, startTime, endTime, repeat, location, hint
+                );
+
+                // Firebase
+                db.collection("activities")
+                        .add(newActivity)
+                        .addOnSuccessListener(documentReference -> {
+                            Log.d("Firebase", "活動已儲存，ID: " + documentReference.getId());
+                            Toast.makeText(Activity.this, "活動已儲存", Toast.LENGTH_SHORT).show();
+                            finish(); // 回上頁
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("Firebase", "儲存失敗", e);
+                            Toast.makeText(Activity.this, "儲存失敗", Toast.LENGTH_SHORT).show();
+                        });
 
                 // 回到上一頁
                 finish();
             }
         });
 
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    //Color Picker
+    private void setColorSelectListener(ImageView imageView, String colorName) {
+        imageView.setOnClickListener(v -> {
+            // 移除前一個的選取效果
+            if (lastSelectedColorView != null) {
+                lastSelectedColorView.setBackground(null); // 或 setPadding(0, 0, 0, 0)
+            }
+
+            // 套用新選取效果
+            imageView.setBackgroundResource(R.drawable.color_selected_border); // 可自訂框線 drawable
+            selectedColor = colorName;
+            lastSelectedColorView = imageView;
+        });
+    }
+    private String getSelectedColor() {
+        return selectedColor;
     }
 
     //Date Picker
@@ -385,5 +486,22 @@ public class Activity extends AppCompatActivity {
 
         dialog.show();
     }
+    private int repeatStrToCode(String str) {
+        switch (str) {
+            case "每天": return 1;
+            case "每兩天": return 2;
+            case "每三天": return 3;
+            case "每五天": return 5;
+            case "每週": return 7;
+            case "每十天": return 10;
+            case "每十五天": return 15;
+            case "每二十天": return 20;
+            case "每月": return 30;
+            case "每兩月": return 60;
+            case "每年": return 365;
+            default: return 0;
+        }
+    }
+
 
 }

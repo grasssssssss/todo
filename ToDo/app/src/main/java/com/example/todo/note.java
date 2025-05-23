@@ -102,7 +102,6 @@ public class note extends Fragment {
             });
         }
 
-
         // 使用 onFocusChangeListener 來自動儲存文字
         noteEditText.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
