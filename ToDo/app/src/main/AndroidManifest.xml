@@ -13,7 +13,7 @@
         android:theme="@style/Theme.ToDo"
         tools:targetApi="31">
         <activity
-            android:name=".ScheduleActivity"
+            android:name=".AddActivity"
             android:exported="false" />
         <activity
             android:name=".main"

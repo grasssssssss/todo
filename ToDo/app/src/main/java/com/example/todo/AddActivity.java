@@ -25,18 +25,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Activity extends AppCompatActivity {
+public class AddActivity extends AppCompatActivity {
 
-    // Firebase 資料模型
-    public static class ScheduleActivity {
+    // Firebase 資料模型（已重新命名避免混淆）
+    public static class ScheduleData {
         private String userEmail, color, title, startDate, endDate, startTime, endTime, location, hint;
         private Boolean holeDay;
         private int repeat;
 
-        public ScheduleActivity() {} // Firebase 用的無參建構子
+        public ScheduleData() {} // Firebase 用的無參建構子
 
-        public ScheduleActivity(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay,
-                                String startTime, String endTime, int repeat, String location, String hint) {
+        public ScheduleData(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay,
+                            String startTime, String endTime, int repeat, String location, String hint) {
             this.userEmail = userEmail;
             this.color = color;
             this.title = title;
@@ -107,7 +107,7 @@ public class Activity extends AppCompatActivity {
         String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
         String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
 
-        ScheduleActivity act = new ScheduleActivity(userEmail, color, title, startDate, endDate, holeDay, startTime, endTime, repeat, location, hint);
+        ScheduleData act = new ScheduleData(userEmail, color, title, startDate, endDate, holeDay, startTime, endTime, repeat, location, hint);
 
         db.collection("activities")
                 .add(act)
@@ -121,16 +121,12 @@ public class Activity extends AppCompatActivity {
                 });
     }
 
-    //Color Picker
     private void setColorSelectListener(ImageView imageView, String colorName) {
         imageView.setOnClickListener(v -> {
-            // 移除前一個的選取效果
             if (lastSelectedColorView != null) {
-                lastSelectedColorView.setBackground(null); // 或 setPadding(0, 0, 0, 0)
+                lastSelectedColorView.setBackground(null);
             }
-
-            // 套用新選取效果
-            imageView.setBackgroundResource(R.drawable.color_selected_border); // 可自訂框線 drawable
+            imageView.setBackgroundResource(R.drawable.color_selected_border);
             selectedColor = colorName;
             lastSelectedColorView = imageView;
         });
