@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
@@ -66,6 +67,15 @@ public class home extends Fragment {
 
         TextView addActivity = view.findViewById(R.id.text_add);
         addActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        LinearLayout addNew = view.findViewById(R.id.add_new);
+        addNew.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), AddActivity.class);

@@ -154,22 +154,23 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/add_new"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#808080"/>
+                            android:textColor="#808080" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="_______________"
-                            android:textSize="14sp"
-                            android:textColor="#BFBFBF"/>
+                            android:textColor="#BFBFBF"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                 </LinearLayout>
