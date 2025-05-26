@@ -27,7 +27,6 @@ import java.util.*;
 
 public class AddActivity extends AppCompatActivity {
 
-    // Firebase 資料模型（已重新命名避免混淆）
     public static class ScheduleData {
         private String userEmail, color, title, startDate, endDate, startTime, endTime, location, hint;
         private Boolean holeDay;
@@ -49,6 +48,19 @@ public class AddActivity extends AppCompatActivity {
             this.location = location;
             this.hint = hint;
         }
+
+        public String getUserEmail() { return userEmail; }
+        public String getColor() { return color; }
+        public String getTitle() { return title; }
+        public String getStartDate() { return startDate; }
+        public String getEndDate() { return endDate; }
+        public Boolean getHoleDay() { return holeDay; }
+        public String getStartTime() { return startTime; }
+        public String getEndTime() { return endTime; }
+        public int getRepeat() { return repeat; }
+        public String getLocation() { return location; }
+        public String getHint() { return hint; }
+
     }
 
     private final ArrayList<String> reminderList = new ArrayList<>();
