@@ -16,9 +16,9 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -30,15 +30,16 @@ public class note extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private FirebaseFirestore db;  // Firebase Firestore instance
+    private FirebaseFirestore db;
     private EditText noteEditText;
     private TextView dateText;
-    private String selectedMoodColor;  // 用來存儲選擇的顏色
-    private View rootView; // 用來存儲 view
+    private String selectedMoodColor;
+    private View rootView;
 
-    public note() {
-        // Required empty public constructor
-    }
+    private Date currentDate;
+    private TextView nextDay; // ← 宣告成員變數
+
+    public note() {}
 
     public static note newInstance(String param1, String param2) {
         note fragment = new note();
@@ -57,24 +58,17 @@ public class note extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        // 初始化 Firebase 實例
         db = FirebaseFirestore.getInstance();
+        currentDate = new Date(); // 初始化為今天
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_note, container, false); // 使用 rootView
+        rootView = inflater.inflate(R.layout.fragment_note, container, false);
 
-        // 取得 EditText 和 TextView
         noteEditText = rootView.findViewById(R.id.noteEditText);
         dateText = rootView.findViewById(R.id.dateText);
 
-        // 取得今天的日期
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
-        String today = sdf.format(new Date());
-        dateText.setText(today);
-
-        // 初始化心情圖示並設置顏色
         ImageView[] moods = {
                 rootView.findViewById(R.id.mood1),
                 rootView.findViewById(R.id.mood2),
@@ -90,107 +84,123 @@ public class note extends Fragment {
         for (int i = 0; i < moods.length; i++) {
             final int selectedIndex = i;
             moods[i].setOnClickListener(v -> {
-                // 清除之前的顏色
                 for (ImageView mood : moods) {
                     mood.setColorFilter(null);
                 }
 
-                // 設置選擇的顏色
                 moods[selectedIndex].setColorFilter(android.graphics.Color.parseColor(moodColors[selectedIndex]));
-                selectedMoodColor = moodColors[selectedIndex];  // 儲存選擇的顏色
+                selectedMoodColor = moodColors[selectedIndex];
                 saveNoteData();
             });
         }
 
-        // 使用 onFocusChangeListener 來自動儲存文字
         noteEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                saveNoteData();  // 當焦點離開 EditText 時儲存資料
-            }
+            if (!hasFocus) saveNoteData();
         });
 
-        // 點擊其他地方時，強制儲存資料
         rootView.setOnTouchListener((v, event) -> {
             if (noteEditText.isFocused()) {
-                noteEditText.clearFocus();  // 清除焦點，觸發 onFocusChangeListener
+                noteEditText.clearFocus();
             }
             return false;
         });
 
-        return rootView; // 返回 rootView
+        // ← 前一天、→ 後一天
+        TextView prevDay = rootView.findViewById(R.id.prevDay);
+        nextDay = rootView.findViewById(R.id.nextDay); // ← 初始化為全域變數
+
+        prevDay.setOnClickListener(v -> changeDateBy(-1));
+        nextDay.setOnClickListener(v -> changeDateBy(1));
+
+        updateDateText();
+        loadNoteData();
+
+        return rootView;
     }
 
-    // 儲存資料的函數（儲存文字、日期、心情顏色和使用者 Email）
-    // 儲存資料的函數（儲存文字、日期、心情顏色和使用者 Email）
+    private void changeDateBy(int days) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.DATE, days);
+        currentDate = calendar.getTime();
+
+        updateDateText();
+        loadNoteData();
+    }
+
+    private void updateDateText() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
+        dateText.setText(sdf.format(currentDate));
+        updateNextDayVisibility(); // ← 加入隱藏功能
+    }
+
+    private void updateNextDayVisibility() {
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+
+        Calendar selected = Calendar.getInstance();
+        selected.setTime(currentDate);
+        selected.set(Calendar.HOUR_OF_DAY, 0);
+        selected.set(Calendar.MINUTE, 0);
+        selected.set(Calendar.SECOND, 0);
+        selected.set(Calendar.MILLISECOND, 0);
+
+        if (!selected.before(today)) {
+            nextDay.setVisibility(View.INVISIBLE);
+        } else {
+            nextDay.setVisibility(View.VISIBLE);
+        }
+
+    }
+
     private void saveNoteData() {
         String noteText = noteEditText.getText().toString();
-        String currentDate = dateText.getText().toString();
+        String currentDateStr = dateText.getText().toString();
 
-        // 從 SharedPreferences 讀取 userEmail
         SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         String userEmail = prefs.getString("useremail", "使用者");
 
-        // 檢查是否有選擇心情顏色，如果沒有則給予默認顏色
         if (selectedMoodColor == null) {
-            selectedMoodColor = "#FFFFFF";  // 默認顏色（白色）
+            selectedMoodColor = "#FFFFFF";
         }
 
-        // 查詢 Firestore 看是否已有相同日期和使用者的筆記
         db.collection("notes")
                 .whereEqualTo("userEmail", userEmail)
-                .whereEqualTo("date", currentDate)
+                .whereEqualTo("date", currentDateStr)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        // 如果已有筆記，則更新該筆記
-                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0); // 只取第一筆資料
-                        String documentId = documentSnapshot.getId(); // 獲取文檔ID
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String documentId = documentSnapshot.getId();
 
-                        // 更新資料
                         db.collection("notes")
                                 .document(documentId)
                                 .update("text", noteText, "color", selectedMoodColor)
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show();
-                                    // 成功更新後的處理
-                                    // 顯示提示，或進行其他操作
-                                })
-                                .addOnFailureListener(e -> {
-                                    // 更新失敗的處理
-                                    e.printStackTrace();
-                                });
+                                .addOnSuccessListener(aVoid ->
+                                        Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(Throwable::printStackTrace);
 
                     } else {
-                        // 如果沒有資料，則新增一條資料
-                        Note note = new Note(noteText, currentDate, selectedMoodColor, userEmail);
+                        Note note = new Note(noteText, currentDateStr, selectedMoodColor, userEmail);
                         db.collection("notes")
                                 .add(note)
-                                .addOnSuccessListener(documentReference -> {
-                                    Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show();
-                                    // 新增成功的處理
-                                    // 顯示提示，或進行其他操作
-                                })
-                                .addOnFailureListener(e -> {
-                                    // 新增失敗的處理
-                                    e.printStackTrace();
-                                });
+                                .addOnSuccessListener(documentReference ->
+                                        Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(Throwable::printStackTrace);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    // 查詢失敗的處理
-                    e.printStackTrace();
-                });
+                .addOnFailureListener(Throwable::printStackTrace);
     }
 
-
-    // 創建 Note 類別，用來儲存文字、日期、心情顏色和使用者 Email
     public static class Note {
         private String text;
         private String date;
         private String color;
         private String userEmail;
 
-        // Constructor
         public Note(String text, String date, String color, String userEmail) {
             this.text = text;
             this.date = date;
@@ -215,56 +225,41 @@ public class note extends Fragment {
         }
     }
 
-    // 查詢 Firestore 資料
     @Override
     public void onResume() {
         super.onResume();
-        loadNoteData();  // 載入資料
+        loadNoteData();
     }
 
-    // 載入資料的方法
     private void loadNoteData() {
-        // 取得今天日期
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
-        String today = sdf.format(new Date());
+        String dateStr = sdf.format(currentDate);
 
-        // 從 SharedPreferences 讀取 userEmail
         SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         String userEmail = prefs.getString("useremail", "使用者");
 
-        // 從 Firestore 查詢符合條件的筆記
         db.collection("notes")
                 .whereEqualTo("userEmail", userEmail)
-                .whereEqualTo("date", today)
+                .whereEqualTo("date", dateStr)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        // 如果有符合條件的筆記
-                        for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                            // 取得筆記資料
-                            String noteText = document.getString("text");
-                            String moodColor = document.getString("color");
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String noteTextValue = document.getString("text");
+                        String moodColor = document.getString("color");
 
-                            // 更新 UI
-                            noteEditText.setText(noteText);
-                            selectedMoodColor = moodColor;
-                            // 更新心情顏色（例如根據存儲的顏色代碼設置顏色）
-                            setMoodColor(moodColor);
-                        }
+                        noteEditText.setText(noteTextValue);
+                        selectedMoodColor = moodColor;
+                        setMoodColor(moodColor);
                     } else {
-                        // 如果沒有資料，顯示預設值或空白
                         noteEditText.setText("");
-                        selectedMoodColor = "#FFFFFF";  // 預設顏色為白色
-                        setMoodColor(selectedMoodColor);  // 更新顏色
+                        selectedMoodColor = "#FFFFFF";
+                        setMoodColor(selectedMoodColor);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    // 查詢失敗
-                    e.printStackTrace();
-                });
+                .addOnFailureListener(Throwable::printStackTrace);
     }
 
-    // 更新心情顏色的方法
     private void setMoodColor(String color) {
         if (color != null) {
             ImageView[] moods = {
@@ -279,19 +274,16 @@ public class note extends Fragment {
                     "#73BF00", "#FFD700", "#FF8000", "#FF0000", "#DDA0DD"
             };
 
-            // 先清除所有顏色
             for (ImageView mood : moods) {
                 mood.setColorFilter(null);
             }
 
-            // 找出符合顏色的 index
             for (int i = 0; i < moodColors.length; i++) {
                 if (moodColors[i].equalsIgnoreCase(color)) {
                     moods[i].setColorFilter(android.graphics.Color.parseColor(color));
-                    break; // 找到就停止
+                    break;
                 }
             }
         }
     }
-
 }
