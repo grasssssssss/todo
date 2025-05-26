@@ -165,8 +165,9 @@ public class AddActivity extends AppCompatActivity {
                 .create();
 
         // 自動補 "/" 功能
-        addDateAutoFormat(startDate);
-        addDateAutoFormat(endDate);
+        addDateAutoFormat(startDate, endDate); // 輸入開始日期時，同步到結束
+        addDateAutoFormat(endDate, null);
+
 
         confirmBtn.setOnClickListener(v -> {
             String start = startDate.getText().toString().trim();
@@ -228,6 +229,47 @@ public class AddActivity extends AppCompatActivity {
                     editText.setText(current);
                     editText.setSelection(current.length());
                     editText.addTextChangedListener(this);
+                }
+            }
+        });
+    }
+    private void addDateAutoFormat(EditText editText, EditText targetEndDate) {
+        editText.addTextChangedListener(new TextWatcher() {
+            private String current = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals(current)) {
+                    String clean = s.toString().replaceAll("[^\\d]", "");
+
+                    StringBuilder formatted = new StringBuilder();
+                    int index = 0;
+
+                    for (int i = 0; i < clean.length() && i < 8; i++) {
+                        formatted.append(clean.charAt(i));
+                        index++;
+
+                        if (index == 2 || index == 4) {
+                            formatted.append('/');
+                        }
+                    }
+
+                    current = formatted.toString();
+                    editText.removeTextChangedListener(this);
+                    editText.setText(current);
+                    editText.setSelection(current.length());
+                    editText.addTextChangedListener(this);
+
+                    // ✅ 如果填的是 startDate，就同步更新 endDate
+                    if (targetEndDate != null) {
+                        targetEndDate.setText(current);
+                    }
                 }
             }
         });
