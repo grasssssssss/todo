@@ -72,7 +72,7 @@ public class AddActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_activity);
+        setContentView(R.layout.activity_add_activity);
 
         // 顏色選擇器
         setColorSelectListener(findViewById(R.id.color_blue), "blue");
@@ -90,6 +90,9 @@ public class AddActivity extends AppCompatActivity {
 
         // 儲存按鈕
         findViewById(R.id.btn_store).setOnClickListener(v -> saveActivity());
+
+        //cancel btn
+        findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

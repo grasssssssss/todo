@@ -219,6 +219,15 @@
                     android:text="儲存"
                     android:textColor="@color/white" />
 
+                <Button
+                    android:id="@+id/btn_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:backgroundTint="@color/gray"
+                    android:text="取消"
+                    android:textColor="@color/white" />
+
             </LinearLayout>
         </ScrollView>
     </androidx.cardview.widget.CardView>
