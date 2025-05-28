@@ -31,6 +31,27 @@ public class AddActivity extends AppCompatActivity {
         private String userEmail, color, title, startDate, endDate, startTime, endTime, location, hint;
         private Boolean holeDay;
         private int repeat;
+        private boolean isDone = false;
+        private String documentId;
+        private int originalOrder;
+
+        public int getOriginalOrder() { return originalOrder; }
+        public void setOriginalOrder(int order) { this.originalOrder = order; }
+
+
+        public String getDocumentId() {
+            return documentId;
+        }
+        public void setDocumentId(String documentId) {
+            this.documentId = documentId;
+        }
+
+        public boolean isDone() {
+            return isDone;
+        }
+        public void setDone(boolean done) {
+            isDone = done;
+        }
 
         public ScheduleData() {} // Firebase 用的無參建構子
 

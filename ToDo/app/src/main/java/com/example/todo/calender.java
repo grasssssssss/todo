@@ -24,19 +24,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link calender#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class calender extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -55,8 +47,11 @@ public class calender extends Fragment {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     todoList.clear();
+                    int index = 0;
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                        item.setDocumentId(doc.getId());
+                        item.setOriginalOrder(index++); // ← 加這行記住原始順序
                         todoList.add(item);
                     }
                     Log.d("Firestore", "抓到資料數量: " + todoList.size());
