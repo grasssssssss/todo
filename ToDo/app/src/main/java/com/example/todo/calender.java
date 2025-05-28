@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -58,8 +59,8 @@ public class calender extends Fragment {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         todoList.add(item);
                     }
-                    Log.d("Firestore", "抓到資料數量: " + todoList.size()); // ✅ 加在這就好
-                    adapter.notifyDataSetChanged(); // ✅ 這也只呼叫一次就好
+                    Log.d("Firestore", "抓到資料數量: " + todoList.size());
+                    adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("Firestore", "讀取資料失敗", e);
@@ -95,10 +96,20 @@ public class calender extends Fragment {
         adapter = new TodoAdapter(todoList);
         recyclerView.setAdapter(adapter);
         CalendarView calendarView = view.findViewById(R.id.calendarView);
+        // 點選日曆某天
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
-            String dateStr = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
+            String dateStr = String.format("%02d/%02d/%04d", month + 1, dayOfMonth, year);
             fetchTodosFromFirebase(dateStr);
         });
+
+        // 今天
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        String today = String.format("%02d/%02d/%04d", month + 1, day, year);
+        calendarView.setDate(calendar.getTimeInMillis(), false, true);
+        fetchTodosFromFirebase(today);
 
         //add new activity
         LinearLayout addNew = view.findViewById(R.id.add_new);

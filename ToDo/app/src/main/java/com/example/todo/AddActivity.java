@@ -74,7 +74,7 @@ public class AddActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_activity);
 
-        // 顏色選擇器
+        // select color
         setColorSelectListener(findViewById(R.id.color_blue), "blue");
         setColorSelectListener(findViewById(R.id.color_red), "red");
         setColorSelectListener(findViewById(R.id.color_purp), "purple");
@@ -82,16 +82,16 @@ public class AddActivity extends AppCompatActivity {
         setColorSelectListener(findViewById(R.id.color_orange), "orange");
         setColorSelectListener(findViewById(R.id.color_green), "green");
 
-        // 日期 / 時間 / 通知 / 重複
+        // date/time/notification/repeat
         findViewById(R.id.ed_date).setOnClickListener(v -> showManualDateInputDialog());
         findViewById(R.id.ed_time).setOnClickListener(v -> showTimePickerDialog());
         findViewById(R.id.ed_notificatetion).setOnClickListener(v -> showReminderDialog());
         findViewById(R.id.ed_repeat).setOnClickListener(v -> showRepeatPickerDialog());
 
-        // 儲存按鈕
+        // store
         findViewById(R.id.btn_store).setOnClickListener(v -> saveActivity());
 
-        //cancel btn
+        // cancel btn
         findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -136,6 +136,7 @@ public class AddActivity extends AppCompatActivity {
                 });
     }
 
+    //color picker
     private void setColorSelectListener(ImageView imageView, String colorName) {
         imageView.setOnClickListener(v -> {
             if (lastSelectedColorView != null) {
@@ -324,6 +325,12 @@ public class AddActivity extends AppCompatActivity {
                 edTime.setText(timeString);
             }
         });
+
+        // 預設時間：00:00
+        startPicker.setHour(0);
+        startPicker.setMinute(0);
+        endPicker.setHour(0);
+        endPicker.setMinute(0);
 
         dialog.show();
     }
