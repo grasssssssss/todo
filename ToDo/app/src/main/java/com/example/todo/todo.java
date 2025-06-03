@@ -8,7 +8,16 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,21 +66,114 @@ public class todo extends Fragment {
         }
     }
 
+    private LinearLayout todayContainer, pastContainer, reminderContainer;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_todo, container, false);
 
+        todayContainer = view.findViewById(R.id.today_container);
+        pastContainer = view.findViewById(R.id.past_container);
+        reminderContainer = view.findViewById(R.id.reminder_container);
+
+        // 點新增按鈕
         LinearLayout addNew = view.findViewById(R.id.add_new);
-        addNew.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), AddActivity.class);
-                startActivity(intent);
-            }
+        addNew.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), AddActivity.class);
+            startActivity(intent);
         });
 
+        loadAllTodoLists(); // ✅ 加載所有區塊
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadAllTodoLists();
+    }
+
+
+    private void loadAllTodoLists() {
+        loadTodayTodos();
+        loadPastTodos();
+        loadReminders();
+    }
+
+    private void loadTodayTodos() {
+        String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+
+        FirebaseFirestore.getInstance()
+                .collection("activities")
+                .whereEqualTo("startDate", today)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    todayContainer.removeAllViews(); // 清空
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                        item.setDocumentId(doc.getId());
+                        addTodoItemView(todayContainer, item);
+                    }
+                });
+    }
+
+    private void loadPastTodos() {
+        String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+
+        FirebaseFirestore.getInstance()
+                .collection("activities")
+                .whereLessThan("startDate", today)
+                .whereEqualTo("done", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    pastContainer.removeAllViews();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                        item.setDocumentId(doc.getId());
+                        addTodoItemView(pastContainer, item);
+                    }
+                });
+    }
+
+    private void loadReminders() {
+        String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+
+        FirebaseFirestore.getInstance()
+                .collection("activities")
+                .whereGreaterThan("startDate", today)
+                .whereNotEqualTo("hint", "") // ✅ 只抓有提醒
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    reminderContainer.removeAllViews();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                        item.setDocumentId(doc.getId());
+                        addTodoItemView(reminderContainer, item);
+                    }
+                });
+    }
+
+    private void addTodoItemView(LinearLayout container, AddActivity.ScheduleData item) {
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_todo, container, false);
+
+        CheckBox checkBox = view.findViewById(R.id.todo_checkbox);
+        TextView textView = view.findViewById(R.id.todo_text);
+
+        textView.setText(item.getStartTime() + " " + item.getTitle());
+        checkBox.setChecked(item.isDone());
+
+        // 改變狀態
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            item.setDone(isChecked);
+            FirebaseFirestore.getInstance()
+                    .collection("activities")
+                    .document(item.getDocumentId())
+                    .update("done", isChecked);
+            loadAllTodoLists();
+        });
+
+        container.addView(view);
     }
 
 }
