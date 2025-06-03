@@ -51,16 +51,20 @@ public class calender extends Fragment {
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         item.setDocumentId(doc.getId());
-                        item.setOriginalOrder(index++); // ← 加這行記住原始順序
+                        item.setOriginalOrder(index++);
                         todoList.add(item);
                     }
                     Log.d("Firestore", "抓到資料數量: " + todoList.size());
+
+
+                    adapter.sortList();
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("Firestore", "讀取資料失敗", e);
                 });
     }
+
 
     public static calender newInstance(String param1, String param2) {
         calender fragment = new calender();

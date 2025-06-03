@@ -84,7 +84,7 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
     }
 
 
-    private void sortList() {
+     void sortList() {
         Collections.sort(todoList, (a, b) -> {
             if (a.isDone() && !b.isDone()) return 1;   // a 完成 → 排後面
             if (!a.isDone() && b.isDone()) return -1;  // b 完成 → 排後面
