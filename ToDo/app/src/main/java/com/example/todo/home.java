@@ -115,7 +115,7 @@ public class home extends Fragment {
         return view;
     }
 
-    //get tody do list
+    //get today do list
     private void loadTodayTodos() {
         String todayStr = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
         db.collection("activities")
