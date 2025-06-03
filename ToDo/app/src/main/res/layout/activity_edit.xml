@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddActivity">
+    tools:context=".EditActivity">
 
     <ImageView
         android:layout_width="200dp"
@@ -217,6 +217,15 @@
                     android:layout_marginBottom="8dp"
                     android:backgroundTint="#FF6584"
                     android:text="更改"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/btn_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:backgroundTint="@color/gray"
+                    android:text="刪除"
                     android:textColor="@color/white" />
 
                 <Button
