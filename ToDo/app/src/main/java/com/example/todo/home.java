@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -40,6 +43,11 @@ public class home extends Fragment {
         // Required empty public constructor
     }
 
+    private RecyclerView todayRecyclerView;
+    private TodoAdapter todayAdapter;
+    private ArrayList<AddActivity.ScheduleData> todayTodoList = new ArrayList<>();
+
+
     public static home newInstance(String param1, String param2) {
         home fragment = new home();
         Bundle args = new Bundle();
@@ -47,6 +55,12 @@ public class home extends Fragment {
         args.putString("param2", param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadTodayTodos(); // get do list again
     }
 
     @Override
@@ -62,16 +76,23 @@ public class home extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // 讀取暱稱
+        //read nickname
         SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         String nickname = prefs.getString("nickname", "使用者");
-
         greetingText = view.findViewById(R.id.text_greeting);
         greetingText.setText("Good Afternoon, " + nickname);
 
+        //today list
+        todayRecyclerView = view.findViewById(R.id.todayRecyclerView);
+        todayRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        todayAdapter = new TodoAdapter(todayTodoList);
+        todayRecyclerView.setAdapter(todayAdapter);
+        loadTodayTodos();
+
+
+        //add activity
         addActivity = view.findViewById(R.id.text_add);
         addNew = view.findViewById(R.id.add_new);
-
         addActivity.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddActivity.class);
             startActivity(intent);
@@ -89,15 +110,37 @@ public class home extends Fragment {
         mood3 = view.findViewById(R.id.mood3);
         mood4 = view.findViewById(R.id.mood4);
         mood5 = view.findViewById(R.id.mood5);
-
-
         loadTodayNote();
 
         return view;
     }
 
+    //get tody do list
+    private void loadTodayTodos() {
+        String todayStr = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+        db.collection("activities")
+                .whereEqualTo("startDate", todayStr)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    todayTodoList.clear();
+                    int index = 0;
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                        item.setDocumentId(doc.getId());
+                        item.setOriginalOrder(index++);
+                        todayTodoList.add(item);
+                    }
+                    todayAdapter.sortList(); // 用 Adapter 內的排序
+                    todayAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "讀取今日代辦事項失敗", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    //get today note
     private void loadTodayNote() {
-        // 取得今天日期，格式 yyyy-MM-dd
+        // 取得今天日期
         String todayStr = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(new Date());
 
         db.collection("notes")
