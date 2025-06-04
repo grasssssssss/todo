@@ -54,6 +54,7 @@
                 android:text="變更使用者名稱" />
 
             <EditText
+                android:id="@+id/editText_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
@@ -65,13 +66,14 @@
                 android:textColorHint="#A9A9A9" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/textView6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:text="變更Email" />
 
             <EditText
+                android:id="@+id/editText_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
@@ -83,13 +85,14 @@
                 android:textColorHint="#A9A9A9" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/textView7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:text="變更密碼" />
 
             <EditText
+                android:id="@+id/editText_old_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -100,6 +103,7 @@
                 android:textColorHint="#A9A9A9" />
 
             <EditText
+                android:id="@+id/editText_new_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -110,6 +114,7 @@
                 android:textColorHint="#A9A9A9" />
 
             <EditText
+                android:id="@+id/editText_confirm_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
