@@ -4,50 +4,38 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link todo#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class todo extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private RecyclerView recyclerToday, recyclerPast, recyclerReminder;
+    private TodoAdapter adapterToday, adapterPast, adapterReminder;
+    private ArrayList<AddActivity.ScheduleData> listToday = new ArrayList<>();
+    private ArrayList<AddActivity.ScheduleData> listPast = new ArrayList<>();
+    private ArrayList<AddActivity.ScheduleData> listReminder = new ArrayList<>();
 
     public todo() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment todo.
-     */
-    // TODO: Rename and change types and number of parameters
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+
     public static todo newInstance(String param1, String param2) {
         todo fragment = new todo();
         Bundle args = new Bundle();
@@ -58,32 +46,34 @@ public class todo extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    private LinearLayout todayContainer, pastContainer, reminderContainer;
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_todo, container, false);
 
-        todayContainer = view.findViewById(R.id.today_container);
-        pastContainer = view.findViewById(R.id.past_container);
-        reminderContainer = view.findViewById(R.id.reminder_container);
+        recyclerToday = view.findViewById(R.id.recycler_today);
+        recyclerPast = view.findViewById(R.id.recycler_past);
+        recyclerReminder = view.findViewById(R.id.recycler_reminder);
 
-        // 點新增按鈕
-        LinearLayout addNew = view.findViewById(R.id.add_new);
+        adapterToday = new TodoAdapter(listToday);
+        adapterPast = new TodoAdapter(listPast);
+        adapterReminder = new TodoAdapter(listReminder);
+
+        recyclerToday.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerToday.setAdapter(adapterToday);
+
+        recyclerPast.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerPast.setAdapter(adapterPast);
+
+        recyclerReminder.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerReminder.setAdapter(adapterReminder);
+
+        View addNew = view.findViewById(R.id.add_new);
         addNew.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddActivity.class);
             startActivity(intent);
         });
 
-        loadAllTodoLists(); // ✅ 加載所有區塊
+        loadAllTodoLists();
 
         return view;
     }
@@ -93,7 +83,6 @@ public class todo extends Fragment {
         super.onResume();
         loadAllTodoLists();
     }
-
 
     private void loadAllTodoLists() {
         loadTodayTodos();
@@ -109,12 +98,14 @@ public class todo extends Fragment {
                 .whereEqualTo("startDate", today)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    todayContainer.removeAllViews(); // 清空
+                    listToday.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         item.setDocumentId(doc.getId());
-                        addTodoItemView(todayContainer, item);
+                        listToday.add(item);
                     }
+                    adapterToday.sortList();
+                    adapterToday.notifyDataSetChanged();
                 });
     }
 
@@ -127,14 +118,18 @@ public class todo extends Fragment {
                 .whereEqualTo("done", false)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    pastContainer.removeAllViews();
+                    listPast.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         item.setDocumentId(doc.getId());
-                        addTodoItemView(pastContainer, item);
+                        listPast.add(item);
                     }
-                });
+                    adapterPast.sortList();
+                    adapterPast.notifyDataSetChanged();
+                })
+                .addOnFailureListener(Throwable::printStackTrace);
     }
+
 
     private void loadReminders() {
         String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
@@ -142,38 +137,17 @@ public class todo extends Fragment {
         FirebaseFirestore.getInstance()
                 .collection("activities")
                 .whereGreaterThan("startDate", today)
-                .whereNotEqualTo("hint", "") // ✅ 只抓有提醒
+                .whereNotEqualTo("hint", "")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    reminderContainer.removeAllViews();
+                    listReminder.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         item.setDocumentId(doc.getId());
-                        addTodoItemView(reminderContainer, item);
+                        listReminder.add(item);
                     }
+                    adapterReminder.sortList();
+                    adapterReminder.notifyDataSetChanged();
                 });
     }
-
-    private void addTodoItemView(LinearLayout container, AddActivity.ScheduleData item) {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_todo, container, false);
-
-        CheckBox checkBox = view.findViewById(R.id.todo_checkbox);
-        TextView textView = view.findViewById(R.id.todo_text);
-
-        textView.setText(item.getStartTime() + " " + item.getTitle());
-        checkBox.setChecked(item.isDone());
-
-        // 改變狀態
-        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            item.setDone(isChecked);
-            FirebaseFirestore.getInstance()
-                    .collection("activities")
-                    .document(item.getDocumentId())
-                    .update("done", isChecked);
-            loadAllTodoLists();
-        });
-
-        container.addView(view);
-    }
-
 }

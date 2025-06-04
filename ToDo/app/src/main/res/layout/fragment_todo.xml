@@ -67,11 +67,11 @@
                         android:textSize="14sp"
                         android:layout_marginBottom="8dp" />
 
-                    <LinearLayout
-                        android:id="@+id/today_container"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_today"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                        android:paddingBottom="8dp"/>
 
                     <LinearLayout
                         android:id="@+id/add_new"
@@ -118,11 +118,11 @@
                         android:textSize="14sp"
                         android:layout_marginBottom="8dp" />
 
-                    <LinearLayout
-                        android:id="@+id/past_container"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_past"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                        android:paddingBottom="8dp"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -150,11 +150,11 @@
                         android:textSize="14sp"
                         android:layout_marginBottom="8dp" />
 
-                    <LinearLayout
-                        android:id="@+id/reminder_container"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_reminder"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical" />
+                        android:paddingBottom="8dp"/>
 
 
                 </LinearLayout>
