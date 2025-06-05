@@ -28,61 +28,51 @@ import java.util.*;
 public class AddActivity extends AppCompatActivity {
 
     public static class ScheduleData {
-        private String userEmail, color, title, startDate, endDate, startTime, endTime, location, hint;
+        private String userEmail, color, title, location, hint;
         private Boolean holeDay;
         private int repeat;
         private boolean isDone = false;
         private String documentId;
         private int originalOrder;
 
-        public int getOriginalOrder() { return originalOrder; }
-        public void setOriginalOrder(int order) { this.originalOrder = order; }
-
-
-        public String getDocumentId() {
-            return documentId;
-        }
-        public void setDocumentId(String documentId) {
-            this.documentId = documentId;
-        }
-
-        public boolean isDone() {
-            return isDone;
-        }
-        public void setDone(boolean done) {
-            isDone = done;
-        }
+        private Date startDateTime; // 日期+時間
+        private Date endDateTime;
 
         public ScheduleData() {} // Firebase 用的無參建構子
 
-        public ScheduleData(String userEmail, String color, String title, String startDate, String endDate, Boolean holeDay,
-                            String startTime, String endTime, int repeat, String location, String hint) {
+        public ScheduleData(String userEmail, String color, String title, Date startDateTime, Date endDateTime,
+                            Boolean holeDay, int repeat, String location, String hint) {
             this.userEmail = userEmail;
             this.color = color;
             this.title = title;
-            this.startDate = startDate;
-            this.endDate = endDate;
+            this.startDateTime = startDateTime;
+            this.endDateTime = endDateTime;
             this.holeDay = holeDay;
-            this.startTime = startTime;
-            this.endTime = endTime;
             this.repeat = repeat;
             this.location = location;
             this.hint = hint;
         }
 
+        // Getter & Setter
+        public Date getStartDateTime() { return startDateTime; }
+        public void setStartDateTime(Date startDateTime) { this.startDateTime = startDateTime; }
+        public Date getEndDateTime() { return endDateTime; }
+        public void setEndDateTime(Date endDateTime) { this.endDateTime = endDateTime; }
         public String getUserEmail() { return userEmail; }
         public String getColor() { return color; }
         public String getTitle() { return title; }
-        public String getStartDate() { return startDate; }
-        public String getEndDate() { return endDate; }
         public Boolean getHoleDay() { return holeDay; }
-        public String getStartTime() { return startTime; }
-        public String getEndTime() { return endTime; }
         public int getRepeat() { return repeat; }
         public String getLocation() { return location; }
         public String getHint() { return hint; }
-
+        public boolean isDone() { return isDone; }
+        public void setDone(boolean done) { isDone = done; }
+        public String getDocumentId() { return documentId; }
+        public void setDocumentId(String documentId) { this.documentId = documentId; }
+        public int getOriginalOrder() { return originalOrder; }
+        public void setOriginalOrder(int order) { this.originalOrder = order; }
     }
+
 
     private final ArrayList<String> reminderList = new ArrayList<>();
     private String selectedColor = "blue";
@@ -131,30 +121,50 @@ public class AddActivity extends AppCompatActivity {
 
         String dateRange = ((TextView) findViewById(R.id.ed_date)).getText().toString();
         String[] dates = dateRange.split(" - ");
-        String startDate = dates[0];
-        String endDate = dates.length > 1 ? dates[1] : dates[0];
+        String startDateStr = dates[0];
+        String endDateStr = dates.length > 1 ? dates[1] : dates[0];
 
         String timeRange = ((TextView) findViewById(R.id.ed_time)).getText().toString();
         boolean holeDay = timeRange.equals("全天");
-        String startTime = holeDay ? null : timeRange.split(" - ")[0];
-        String endTime = holeDay ? null : timeRange.split(" - ")[1];
 
-        int repeat = repeatStrToCode(((TextView) findViewById(R.id.ed_repeat)).getText().toString());
-        String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
-        String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
+        // 預設時間（全天）: 00:00
+        String startTimeStr = "00:00";
+        String endTimeStr = "23:59";
 
-        ScheduleData act = new ScheduleData(userEmail, color, title, startDate, endDate, holeDay, startTime, endTime, repeat, location, hint);
+        if (!holeDay) {
+            String[] times = timeRange.split(" - ");
+            startTimeStr = times[0];
+            endTimeStr = times[1];
+        }
 
-        db.collection("activities")
-                .add(act)
-                .addOnSuccessListener(docRef -> {
-                    Toast.makeText(this, "活動已儲存", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "儲存失敗", Toast.LENGTH_SHORT).show();
-                    Log.e("Firebase", "Error saving", e);
-                });
+        // 用 SimpleDateFormat 解析成 Date（日期+時間）
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm", Locale.getDefault());
+            Date startDateTime = sdf.parse(startDateStr + " " + startTimeStr);
+            Date endDateTime = sdf.parse(endDateStr + " " + endTimeStr);
+
+            int repeat = repeatStrToCode(((TextView) findViewById(R.id.ed_repeat)).getText().toString());
+            String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
+            String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
+
+            ScheduleData act = new ScheduleData(
+                    userEmail, color, title, startDateTime, endDateTime, holeDay, repeat, location, hint);
+
+            db.collection("activities")
+                    .add(act)
+                    .addOnSuccessListener(docRef -> {
+                        Toast.makeText(this, "活動已儲存", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "儲存失敗", Toast.LENGTH_SHORT).show();
+                        Log.e("Firebase", "Error saving", e);
+                    });
+
+        } catch (ParseException e) {
+            Toast.makeText(this, "日期或時間格式錯誤", Toast.LENGTH_SHORT).show();
+            Log.e("DateParse", "Error parsing date/time", e);
+        }
     }
 
     //color picker
@@ -476,7 +486,7 @@ public class AddActivity extends AppCompatActivity {
                 .create();
 
         String[] repeatOptions = {
-                "每天", "每兩天", "每三天", "每五天", "每週", "每十天",
+                "不要重複","每天", "每兩天", "每三天", "每五天", "每週", "每十天",
                 "每十五天", "每二十天", "每月", "每兩月", "每年"
         };
 
@@ -497,6 +507,7 @@ public class AddActivity extends AppCompatActivity {
     }
     private int repeatStrToCode(String str) {
         switch (str) {
+            case "不要重複": return 0;
             case "每天": return 1;
             case "每兩天": return 2;
             case "每三天": return 3;
@@ -508,7 +519,7 @@ public class AddActivity extends AppCompatActivity {
             case "每月": return 30;
             case "每兩月": return 60;
             case "每年": return 365;
-            default: return 0;
+            default: return -1;
         }
     }
 }

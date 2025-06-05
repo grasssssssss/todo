@@ -24,6 +24,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -117,9 +118,23 @@ public class home extends Fragment {
 
     //get today do list
     private void loadTodayTodos() {
-        String todayStr = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+        Calendar startCal = Calendar.getInstance();
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        Date startOfDay = startCal.getTime();
+
+        Calendar endCal = Calendar.getInstance();
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
+        Date endOfDay = endCal.getTime();
+
         db.collection("activities")
-                .whereEqualTo("startDate", todayStr)
+                .whereGreaterThanOrEqualTo("startDateTime", startOfDay)
+                .whereLessThanOrEqualTo("startDateTime", endOfDay)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     todayTodoList.clear();
@@ -130,13 +145,14 @@ public class home extends Fragment {
                         item.setOriginalOrder(index++);
                         todayTodoList.add(item);
                     }
-                    todayAdapter.sortList(); // 用 Adapter 內的排序
+                    todayAdapter.sortList();
                     todayAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "讀取今日代辦事項失敗", Toast.LENGTH_SHORT).show();
                 });
     }
+
 
     //get today note
     private void loadTodayNote() {

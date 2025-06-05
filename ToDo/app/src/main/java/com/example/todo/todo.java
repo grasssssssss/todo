@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -91,11 +92,24 @@ public class todo extends Fragment {
     }
 
     private void loadTodayTodos() {
-        String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+        Calendar startCal = Calendar.getInstance();
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        Date startOfDay = startCal.getTime();
+
+        Calendar endCal = Calendar.getInstance();
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
+        Date endOfDay = endCal.getTime();
 
         FirebaseFirestore.getInstance()
                 .collection("activities")
-                .whereEqualTo("startDate", today)
+                .whereGreaterThanOrEqualTo("startDateTime", startOfDay)
+                .whereLessThanOrEqualTo("startDateTime", endOfDay)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     listToday.clear();
@@ -108,6 +122,7 @@ public class todo extends Fragment {
                     adapterToday.notifyDataSetChanged();
                 });
     }
+
 
     private void loadPastTodos() {
         String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());

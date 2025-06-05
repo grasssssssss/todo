@@ -14,8 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder> {
 
@@ -47,12 +49,17 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
     public void onBindViewHolder(@NonNull TodoViewHolder holder, int position) {
         AddActivity.ScheduleData item = todoList.get(position);
 
-        holder.textView.setText(item.getStartTime() + " " + item.getTitle());
+        if (item.getStartDateTime() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String timeStr = sdf.format(item.getStartDateTime());
+            holder.textView.setText(timeStr + " " + item.getTitle());
+        } else {
+            holder.textView.setText(item.getTitle());
+        }
 
         holder.checkBox.setOnCheckedChangeListener(null);
-
-        // 套用完成樣式
         holder.checkBox.setChecked(item.isDone());
+
         if (item.isDone()) {
             holder.textView.setPaintFlags(holder.textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.textView.setTextColor(Color.GRAY);
@@ -61,17 +68,16 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
             holder.textView.setTextColor(Color.BLACK);
         }
 
-        // 設定新的 listener
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // 避免重複觸發
             if (holder.checkBox.isPressed()) {
                 item.setDone(isChecked);
-                updateDoneStatusInFirebase(item); // ✅ 新增這行：更新到 Firebase
+                updateDoneStatusInFirebase(item);
                 sortList();
                 notifyDataSetChanged();
             }
         });
     }
+
     private void updateDoneStatusInFirebase(AddActivity.ScheduleData item) {
         if (item.getDocumentId() == null) return;
 
@@ -84,17 +90,17 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
     }
 
 
-     void sortList() {
+    void sortList() {
         Collections.sort(todoList, (a, b) -> {
-            if (a.isDone() && !b.isDone()) return 1;   // a 完成 → 排後面
-            if (!a.isDone() && b.isDone()) return -1;  // b 完成 → 排後面
+            if (a.isDone() && !b.isDone()) return 1;
+            if (!a.isDone() && b.isDone()) return -1;
 
-            // 兩者都沒完成或都完成 → 比 startTime
-            if (a.getStartTime() == null) return 1;
-            if (b.getStartTime() == null) return -1;
-            return a.getStartTime().compareTo(b.getStartTime());
+            if (a.getStartDateTime() == null) return 1;
+            if (b.getStartDateTime() == null) return -1;
+            return a.getStartDateTime().compareTo(b.getStartDateTime());
         });
     }
+
 
 
     @Override
