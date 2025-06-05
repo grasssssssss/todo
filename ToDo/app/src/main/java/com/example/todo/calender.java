@@ -126,6 +126,7 @@ public class calender extends Fragment {
         addNew.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddActivity.class);
             startActivity(intent);
+            fetchTodosFromFirebase(year, month, day);
         });
 
         return view;

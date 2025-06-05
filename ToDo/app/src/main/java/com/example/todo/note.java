@@ -37,7 +37,7 @@ public class note extends Fragment {
     private View rootView;
 
     private Date currentDate;
-    private TextView nextDay; // ← 宣告成員變數
+    private TextView nextDay;
 
     public note() {}
 

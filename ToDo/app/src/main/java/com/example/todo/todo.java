@@ -147,22 +147,56 @@ public class todo extends Fragment {
 
 
     private void loadReminders() {
-        String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+        // 取得今天時間
+        Calendar nowCal = Calendar.getInstance();
+        Date now = nowCal.getTime();
 
         FirebaseFirestore.getInstance()
                 .collection("activities")
-                .whereGreaterThan("startDate", today)
-                .whereNotEqualTo("hint", "")
+                .whereGreaterThan("startDateTime", now) // 活動是未來的
+                .whereEqualTo("done", false) // 還未完成
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     listReminder.clear();
+
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
                         item.setDocumentId(doc.getId());
-                        listReminder.add(item);
+
+                        // 檢查提醒時間是否已到
+                        if (item.getHint() != null && !item.getHint().isEmpty()) {
+                            String hintStr = item.getHint();
+                            String[] hints = hintStr.split(","); // 假設多個提醒時間用 , 分隔
+
+                            Date earliestReminder = null;
+
+                            for (String hintTimeStr : hints) {
+                                try {
+                                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm", Locale.getDefault());
+                                    Date reminderDate = sdf.parse(hintTimeStr.trim());
+
+                                    if (reminderDate != null && (earliestReminder == null || reminderDate.before(earliestReminder))) {
+                                        earliestReminder = reminderDate;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace(); // 格式錯誤就跳過
+                                }
+                            }
+
+                            // 只有最早提醒時間到達才放入 listReminder
+                            if (earliestReminder != null && !earliestReminder.after(now)) {
+                                listReminder.add(item);
+                            }
+                        }
                     }
+
                     adapterReminder.sortList();
                     adapterReminder.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "讀取提醒資料失敗", Toast.LENGTH_SHORT).show();
                 });
     }
+
 }
