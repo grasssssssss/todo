@@ -30,6 +30,7 @@ public class AddActivity extends AppCompatActivity {
     public static class ScheduleData {
         private String userEmail, color, title, location, hint;
         private Boolean holeDay;
+        private List<Date> reminders;
         private int repeat;
         private boolean isDone = false;
         private String documentId;
@@ -38,7 +39,7 @@ public class AddActivity extends AppCompatActivity {
         private Date startDateTime; // 日期+時間
         private Date endDateTime;
 
-        public ScheduleData() {} // Firebase 用的無參建構子
+        public ScheduleData() {}
 
         public ScheduleData(String userEmail, String color, String title, Date startDateTime, Date endDateTime,
                             Boolean holeDay, int repeat, String location, String hint) {
@@ -62,6 +63,8 @@ public class AddActivity extends AppCompatActivity {
         public String getColor() { return color; }
         public String getTitle() { return title; }
         public Boolean getHoleDay() { return holeDay; }
+        public List<Date> getReminders() { return reminders; }
+        public void setReminders(List<Date> reminders) { this.reminders = reminders; }
         public int getRepeat() { return repeat; }
         public String getLocation() { return location; }
         public String getHint() { return hint; }
@@ -127,7 +130,6 @@ public class AddActivity extends AppCompatActivity {
         String timeRange = ((TextView) findViewById(R.id.ed_time)).getText().toString();
         boolean holeDay = timeRange.equals("全天");
 
-        // 預設時間（全天）: 00:00
         String startTimeStr = "00:00";
         String endTimeStr = "23:59";
 
@@ -137,7 +139,6 @@ public class AddActivity extends AppCompatActivity {
             endTimeStr = times[1];
         }
 
-        // 用 SimpleDateFormat 解析成 Date（日期+時間）
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm", Locale.getDefault());
             Date startDateTime = sdf.parse(startDateStr + " " + startTimeStr);
@@ -147,13 +148,29 @@ public class AddActivity extends AppCompatActivity {
             String location = ((TextView) findViewById(R.id.ed_location)).getText().toString().trim();
             String hint = ((EditText) findViewById(R.id.ed_hint)).getText().toString().trim();
 
-            ScheduleData act = new ScheduleData(
-                    userEmail, color, title, startDateTime, endDateTime, holeDay, repeat, location, hint);
+            // reminderList
+            List<Date> reminderDates = new ArrayList<>();
+            for (String r : reminderList) {
+                String[] parts = r.split(" ");
+                String when = parts[0];
+                String time = parts[1];
 
+                Date reminderDate = calculateReminderDate(startDateTime, when, time);
+                reminderDates.add(reminderDate);
+            }
+
+            // 建立活動
+            ScheduleData act = new ScheduleData(
+                    userEmail, color, title, startDateTime, endDateTime,
+                    holeDay, repeat, location, hint);
+            // 設定提醒
+            act.setReminders(reminderDates);
+
+            // 寫入 Firebase
             db.collection("activities")
                     .add(act)
                     .addOnSuccessListener(docRef -> {
-                        Toast.makeText(this, "活動已儲存", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "活動與提醒已儲存", Toast.LENGTH_SHORT).show();
                         finish();
                     })
                     .addOnFailureListener(e -> {
@@ -166,6 +183,7 @@ public class AddActivity extends AppCompatActivity {
             Log.e("DateParse", "Error parsing date/time", e);
         }
     }
+
 
     //color picker
     private void setColorSelectListener(ImageView imageView, String colorName) {
@@ -382,7 +400,7 @@ public class AddActivity extends AppCompatActivity {
                 .create();
 
         // 日期提醒選項
-        String[] dateOptions = {"當天", "提前一天", "提前兩天", "提前三天"};
+        String[] dateOptions = {"當天", "提前一天", "提前兩天", "提前三天", "提前五天","提前一周", "提前十天"};
         datePicker.setMinValue(0);
         datePicker.setMaxValue(dateOptions.length - 1);
         datePicker.setDisplayedValues(dateOptions);
@@ -472,6 +490,40 @@ public class AddActivity extends AppCompatActivity {
             container.addView(row);
         }
     }
+    private Date calculateReminderDate(Date startDateTime, String when, String time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(startDateTime);
+
+        // 先決定「提前」幾天
+        switch (when) {
+            case "提前一天":
+                cal.add(Calendar.DATE, -1);
+                break;
+            case "提前兩天":
+                cal.add(Calendar.DATE, -2);
+                break;
+            case "提前三天":
+                cal.add(Calendar.DATE, -3);
+                break;
+            case "當天":
+                cal.add(Calendar.DATE, 0);
+                break;
+            default:
+                break;
+        }
+
+        // 設定提醒的時分
+        String[] hm = time.split(":");
+        int hour = Integer.parseInt(hm[0]);
+        int min = Integer.parseInt(hm[1]);
+
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, min);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return cal.getTime();
+    }
 
     //Repeat Picker
     private void showRepeatPickerDialog() {
@@ -519,7 +571,7 @@ public class AddActivity extends AppCompatActivity {
             case "每月": return 30;
             case "每兩月": return 60;
             case "每年": return 365;
-            default: return -1;
+            default: return 0;
         }
     }
 }

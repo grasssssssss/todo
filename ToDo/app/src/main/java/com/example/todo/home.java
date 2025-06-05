@@ -220,7 +220,7 @@ public class home extends Fragment {
 
                         } else {
                             noteDateText.setText("隨手記 "+todayStr);
-                            noteContentText.setText("1寫點什麼吧……");
+                            noteContentText.setText("寫點什麼吧……");
                         }
                     } else {
                         Toast.makeText(getContext(), "讀取隨手記失敗", Toast.LENGTH_SHORT).show();

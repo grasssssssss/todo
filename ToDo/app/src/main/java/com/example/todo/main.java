@@ -57,13 +57,6 @@ public class main extends AppCompatActivity {
                 return true;
             }
         });
-
-
-
-
-
-
-
     }
 
     private void setCurrentFragment(Fragment Fragment) {
