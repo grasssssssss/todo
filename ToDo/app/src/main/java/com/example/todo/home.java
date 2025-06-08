@@ -17,10 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,14 +41,11 @@ public class home extends Fragment {
     private TextView addActivity;
     private LinearLayout addNew;
 
-    public home() {
-        // Required empty public constructor
-    }
-
     private RecyclerView todayRecyclerView;
     private TodoAdapter todayAdapter;
     private ArrayList<AddActivity.ScheduleData> todayTodoList = new ArrayList<>();
 
+    public home() {}
 
     public static home newInstance(String param1, String param2) {
         home fragment = new home();
@@ -61,15 +59,12 @@ public class home extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadTodayTodos(); // get do list again
+        loadTodayTodos(); // get to-do list again
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            // 可擴充參數用，目前沒用到
-        }
     }
 
     @Override
@@ -77,21 +72,20 @@ public class home extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        //read nickname
+        // Greeting text with nickname
         SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         String nickname = prefs.getString("nickname", "使用者");
         greetingText = view.findViewById(R.id.text_greeting);
         greetingText.setText("Good Afternoon, " + nickname);
 
-        //today list
+        // Setup today's to-do list
         todayRecyclerView = view.findViewById(R.id.todayRecyclerView);
         todayRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         todayAdapter = new TodoAdapter(todayTodoList);
         todayRecyclerView.setAdapter(todayAdapter);
         loadTodayTodos();
 
-
-        //add activity
+        // Add activity buttons
         addActivity = view.findViewById(R.id.text_add);
         addNew = view.findViewById(R.id.add_new);
         addActivity.setOnClickListener(v -> {
@@ -103,9 +97,11 @@ public class home extends Fragment {
             startActivity(intent);
         });
 
-        // 找元件
+        // Note and mood
         noteDateText = view.findViewById(R.id.noteDateText);
         noteContentText = view.findViewById(R.id.noteContentText);
+        LinearLayout calendarLayout = view.findViewById(R.id.calendarLayout);
+        LinearLayout todayTodoLayout = view.findViewById(R.id.todayTodoLayout);
         mood1 = view.findViewById(R.id.mood1);
         mood2 = view.findViewById(R.id.mood2);
         mood3 = view.findViewById(R.id.mood3);
@@ -113,10 +109,27 @@ public class home extends Fragment {
         mood5 = view.findViewById(R.id.mood5);
         loadTodayNote();
 
+        // ✅ Add click listener to go to note fragment
+        noteDateText.setOnClickListener(v -> switchToNoteFragment());
+        noteContentText.setOnClickListener(v -> switchToNoteFragment());
+        calendarLayout.setOnClickListener(v -> switchToCalendarFragment() );
+        todayTodoLayout.setOnClickListener(v -> switchToTodoFragment()  );
         return view;
     }
 
-    //get today do list
+    private void switchToNoteFragment() {
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav_menu);
+        bottomNav.setSelectedItemId(R.id.menu_note);
+    }
+    private void switchToCalendarFragment() {
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav_menu);
+        bottomNav.setSelectedItemId(R.id.menu_calender);
+    }
+
+    private void switchToTodoFragment() {
+        BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_nav_menu);
+        bottomNav.setSelectedItemId(R.id.menu_todo);
+    }
     private void loadTodayTodos() {
         Calendar startCal = Calendar.getInstance();
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -153,10 +166,7 @@ public class home extends Fragment {
                 });
     }
 
-
-    //get today note
     private void loadTodayNote() {
-        // 取得今天日期
         String todayStr = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(new Date());
 
         db.collection("notes")
@@ -174,7 +184,6 @@ public class home extends Fragment {
                             String date = doc.getString("date");
 
                             if (date != null) {
-
                                 try {
                                     Date d = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).parse(date);
                                     String displayDate = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(d);
@@ -194,32 +203,23 @@ public class home extends Fragment {
                                 noteContentText.setTextColor(0xFF888888);
                             }
 
-                            // 顯示對應心情圖示
                             if (mood != null) {
+                                mood1.setVisibility(View.GONE);
+                                mood2.setVisibility(View.GONE);
+                                mood3.setVisibility(View.GONE);
+                                mood4.setVisibility(View.GONE);
+                                mood5.setVisibility(View.GONE);
+
                                 switch (mood.intValue()) {
-                                    case 1:
-                                        mood1.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 2:
-                                        mood2.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 3:
-                                        mood3.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 4:
-                                        mood4.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 5:
-                                        mood5.setVisibility(View.VISIBLE);
-                                        break;
-                                    default:
-                                        // 沒有合適心情，全部隱藏
-                                        break;
+                                    case 1: mood1.setVisibility(View.VISIBLE); break;
+                                    case 2: mood2.setVisibility(View.VISIBLE); break;
+                                    case 3: mood3.setVisibility(View.VISIBLE); break;
+                                    case 4: mood4.setVisibility(View.VISIBLE); break;
+                                    case 5: mood5.setVisibility(View.VISIBLE); break;
                                 }
                             }
-
                         } else {
-                            noteDateText.setText("隨手記 "+todayStr);
+                            noteDateText.setText("隨手記 " + todayStr);
                             noteContentText.setText("寫點什麼吧……");
                         }
                     } else {

@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="登出"
-                android:backgroundTint="#FF8080"
+                android:backgroundTint="#FF9B9B"
                 android:textColor="#FFFFFF"
                 style="@style/RoundedButton" />
 
