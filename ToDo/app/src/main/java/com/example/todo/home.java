@@ -174,7 +174,7 @@ public class home extends Fragment {
                             String date = doc.getString("date");
 
                             if (date != null) {
-                                // 顯示成「隨手記 2025年5月26號」格式
+
                                 try {
                                     Date d = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).parse(date);
                                     String displayDate = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(d);

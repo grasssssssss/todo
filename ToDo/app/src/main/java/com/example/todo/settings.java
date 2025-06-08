@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.Intent;
+
 
 import androidx.fragment.app.Fragment;
 
@@ -55,6 +57,18 @@ public class settings extends Fragment {
         emailEditText.setText(prefs.getString("useremail", ""));
 
         saveButton.setOnClickListener(v -> saveChanges());
+
+
+        Button logoutButton = view.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear(); // 清除所有登入狀態
+            editor.apply();
+
+            Intent intent = new Intent(getActivity(), login.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
 
         return view;
     }

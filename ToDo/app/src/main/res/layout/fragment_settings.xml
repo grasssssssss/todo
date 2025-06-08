@@ -133,6 +133,17 @@
                 android:backgroundTint="#FFC1C7"
                 android:text="儲存" />
 
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="登出"
+                android:backgroundTint="#FF8080"
+                android:textColor="#FFFFFF"
+                style="@style/RoundedButton" />
+
+
         </LinearLayout>
     </ScrollView>
 
