@@ -210,6 +210,14 @@ public class AddActivity extends AppCompatActivity {
 
         TextView edDate = findViewById(R.id.ed_date);
 
+        // 取得今天日期字串，格式 MM/dd/yyyy
+        SimpleDateFormat sdate = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        String todayStr = sdate.format(new Date());
+
+        // 設定預設日期為今天
+        startDate.setText(todayStr);
+        endDate.setText(todayStr);
+
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
