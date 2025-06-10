@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import android.view.ContextThemeWrapper;
+
 
 public class home extends Fragment {
 
@@ -68,7 +71,7 @@ public class home extends Fragment {
     public void onResume() {
         super.onResume();
         loadTodayTodos(); // 重新載入今日待辦
-        loadEventsFromFirebase(); // 重新載入本週事件
+        //loadEventsFromFirebase(); // 重新載入本週事件
         loadTodayNote(); // 重新載入今日筆記
     }
 
@@ -375,9 +378,19 @@ public class home extends Fragment {
         return Math.round(dp * density);
     }
 
-
     private void loadEventsFromFirebase() {
-        db.collection("schedules")
+        // 清空舊事件以避免重複
+        for (int i = 0; i < weekEventsLayout.getChildCount(); i++) {
+            LinearLayout dayColumn = (LinearLayout) weekEventsLayout.getChildAt(i);
+            dayColumn.removeAllViews();
+        }
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("useremail", "使用者");
+
+        db.collection("activities")
+                .whereEqualTo("userEmail", userEmail)
+                .orderBy("startDateTime")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -391,6 +404,7 @@ public class home extends Fragment {
                     }
                 });
     }
+
 
     private void addEventToDay(AddActivity.ScheduleData event) {
         if (getView() == null) return;
@@ -408,19 +422,26 @@ public class home extends Fragment {
 
         long diff = eventCal.getTimeInMillis() - startOfWeek.getTimeInMillis();
         int dayIndex = (int) (diff / (24 * 60 * 60 * 1000));
-        if (dayIndex < 0 || dayIndex > 6) return; // 不在本週範圍內
+        if (dayIndex < 0 || dayIndex > 6) return;
 
         LinearLayout dayEvents = (LinearLayout) weekEventsLayout.getChildAt(dayIndex);
         if (dayEvents == null) return;
 
-        TextView eventText = new TextView(getContext());
+        // 使用 style 建立 TextView
+        Context contextWithStyle = new ContextThemeWrapper(getContext(), R.style.CalendarEventLabel);
+        TextView eventText = new TextView(contextWithStyle);
         eventText.setText(event.getTitle());
-        eventText.setTextColor(Color.BLACK);
-        eventText.setTextSize(10);
         eventText.setMaxLines(1);
         eventText.setEllipsize(android.text.TextUtils.TruncateAt.END);
 
+        String colorName = event.getColor();
+        int colorId = getResources().getIdentifier(colorName, "color", requireContext().getPackageName());
+        int resolvedColor =  ContextCompat.getColor(requireContext(), colorId);
+        eventText.setBackgroundColor(resolvedColor);
+
+
         dayEvents.addView(eventText);
     }
+
 
 }
