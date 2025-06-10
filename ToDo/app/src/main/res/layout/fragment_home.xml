@@ -2,6 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFF2F2"
@@ -109,6 +111,7 @@
             </androidx.cardview.widget.CardView>
 
             <!-- ✅ Card 2: 行事曆 -->
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -132,11 +135,12 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="行事曆"
+                            android:text="行事曆 "
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/monthTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=" 2025年3月"
@@ -157,139 +161,170 @@
                             android:textSize="24sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-
-                    <!-- 星期 -->
                     <LinearLayout
+                        android:id="@+id/weekDaysLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="12dp">
-
-                        <!-- 重複7次 -->
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="日"
-                            android:gravity="center"
-                            android:textSize="12sp" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="一" android:gravity="center" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="二" android:gravity="center" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="三" android:gravity="center" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="四" android:gravity="center" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="五" android:gravity="center" android:textSize="12sp"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="六" android:gravity="center" android:textSize="12sp"/>
+                        android:layout_marginTop="12dp"
+                        >
+                        <!-- 7個 TextView 用程式動態產生 -->
                     </LinearLayout>
 
-                    <!-- 日期 -->
                     <LinearLayout
+                        android:id="@+id/weekDatesLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="4dp">
-
-                        <!-- 假設今天是 20 號 -->
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="16" android:textSize="12sp" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="17" android:textSize="12sp" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="18" android:textSize="12sp" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="19" android:textSize="12sp" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="20"
-                            android:textSize="12sp"
-                            android:textColor="@android:color/white"
-                            android:background="#D59CAE" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="21" android:textSize="12sp" />
-
-                        <TextView android:layout_width="0dp" android:layout_height="32dp"
-                            android:layout_weight="1" android:gravity="center"
-                            android:text="22" android:textSize="12sp" />
+                        android:layout_marginTop="4dp"
+                        >
+                        <!-- 7個日期 TextView 用程式動態產生 -->
                     </LinearLayout>
 
-                    <!-- 行程 -->
+                    <!-- 下面行程區塊也用動態的 LinearLayout -->
                     <LinearLayout
+                        android:id="@+id/weekEventsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="4dp">
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                            <TextView
-                                style="@style/CalendarEventLabel"
-                                android:background="#D59CAE"
-                                android:text="報告" />
-
-                            <TextView
-                                style="@style/CalendarEventLabel"
-                                android:background="#A9C3DC"
-                                android:text="會議" />
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                            <TextView
-                                style="@style/CalendarEventLabel"
-                                android:background="#B59CAE"
-                                android:text="吃飯" />
-
-                            <TextView
-                                style="@style/CalendarEventLabel"
-                                android:background="#D59CAE"
-                                android:text="睡覺" />
-
-                            <TextView
-                                style="@style/CalendarEventLabel"
-                                android:background="#A9C3DC"
-                                android:text="打東東" />
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                        </LinearLayout>
-
-                        <View style="@style/VerticalDivider" />
-
-                        <LinearLayout style="@style/CalendarDayColumn">
-                        </LinearLayout>
+                        android:layout_marginTop="4dp"
+                        >
+                        <!-- 7個子 LinearLayout 用程式動態產生或找到已定義的用來放事件 -->
                     </LinearLayout>
+
+
+                    <!--                    &lt;!&ndash; 星期 &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginTop="12dp">-->
+
+<!--                        &lt;!&ndash; 重複7次 &ndash;&gt;-->
+<!--                        <TextView-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:text="日"-->
+<!--                            android:gravity="center"-->
+<!--                            android:textSize="12sp" />-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="一" android:gravity="center" android:textSize="12sp"/>-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="二" android:gravity="center" android:textSize="12sp"/>-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="三" android:gravity="center" android:textSize="12sp"/>-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="四" android:gravity="center" android:textSize="12sp"/>-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="五" android:gravity="center" android:textSize="12sp"/>-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1" android:text="六" android:gravity="center" android:textSize="12sp"/>-->
+<!--                    </LinearLayout>-->
+
+<!--                    &lt;!&ndash; 日期 &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginTop="4dp">-->
+
+<!--                        &lt;!&ndash; 假設今天是 20 號 &ndash;&gt;-->
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="16" android:textSize="12sp" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="17" android:textSize="12sp" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="18" android:textSize="12sp" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="19" android:textSize="12sp" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="20"-->
+<!--                            android:textSize="12sp"-->
+<!--                            android:textColor="@android:color/white"-->
+<!--                            android:background="#D59CAE" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="21" android:textSize="12sp" />-->
+
+<!--                        <TextView android:layout_width="0dp" android:layout_height="32dp"-->
+<!--                            android:layout_weight="1" android:gravity="center"-->
+<!--                            android:text="22" android:textSize="12sp" />-->
+<!--                    </LinearLayout>-->
+
+<!--                    &lt;!&ndash; 行程 &ndash;&gt;-->
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:layout_marginTop="4dp">-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                            <TextView-->
+<!--                                style="@style/CalendarEventLabel"-->
+<!--                                android:background="#D59CAE"-->
+<!--                                android:text="報告" />-->
+
+<!--                            <TextView-->
+<!--                                style="@style/CalendarEventLabel"-->
+<!--                                android:background="#A9C3DC"-->
+<!--                                android:text="會議" />-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                            <TextView-->
+<!--                                style="@style/CalendarEventLabel"-->
+<!--                                android:background="#B59CAE"-->
+<!--                                android:text="吃飯" />-->
+
+<!--                            <TextView-->
+<!--                                style="@style/CalendarEventLabel"-->
+<!--                                android:background="#D59CAE"-->
+<!--                                android:text="睡覺" />-->
+
+<!--                            <TextView-->
+<!--                                style="@style/CalendarEventLabel"-->
+<!--                                android:background="#A9C3DC"-->
+<!--                                android:text="打東東" />-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                        </LinearLayout>-->
+
+<!--                        <View style="@style/VerticalDivider" />-->
+
+<!--                        <LinearLayout style="@style/CalendarDayColumn">-->
+<!--                        </LinearLayout>-->
+<!--                    </LinearLayout>-->
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

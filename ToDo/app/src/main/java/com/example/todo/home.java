@@ -3,15 +3,18 @@ package com.example.todo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,8 +22,8 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,24 +33,27 @@ import java.util.Locale;
 
 public class home extends Fragment {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private LinearLayout weekDaysLayout, weekDatesLayout, weekEventsLayout;
+    private TextView monthTextView;
+
+    private FirebaseFirestore db;
 
     private TextView greetingText;
     private TextView noteDateText;
-    private TextView noteContentText;
     private ImageView mood1, mood2, mood3, mood4, mood5;
 
     private TextView addActivity;
     private LinearLayout addNew;
 
-    public home() {
-        // Required empty public constructor
-    }
-
     private RecyclerView todayRecyclerView;
     private TodoAdapter todayAdapter;
     private ArrayList<AddActivity.ScheduleData> todayTodoList = new ArrayList<>();
+    private String selectedMoodColor;
+    private EditText noteContentText;
 
+    public home() {
+        // Required empty public constructor
+    }
 
     public static home newInstance(String param1, String param2) {
         home fragment = new home();
@@ -61,39 +67,53 @@ public class home extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadTodayTodos(); // get do list again
+        loadTodayTodos(); // 重新載入今日待辦
+        loadEventsFromFirebase(); // 重新載入本週事件
+        loadTodayNote(); // 重新載入今日筆記
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            // 可擴充參數用，目前沒用到
-        }
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        //read nickname
-        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
-        String nickname = prefs.getString("nickname", "使用者");
-        greetingText = view.findViewById(R.id.text_greeting);
-        greetingText.setText("Good Afternoon, " + nickname);
+        // 找元件
+        weekDaysLayout = rootView.findViewById(R.id.weekDaysLayout);
+        weekDatesLayout = rootView.findViewById(R.id.weekDatesLayout);
+        weekEventsLayout = rootView.findViewById(R.id.weekEventsLayout);
+        monthTextView = rootView.findViewById(R.id.monthTextView);
 
-        //today list
-        todayRecyclerView = view.findViewById(R.id.todayRecyclerView);
+        noteContentText = rootView.findViewById(R.id.noteContentText);
+        noteDateText = rootView.findViewById(R.id.noteDateText);
+
+        mood1 = rootView.findViewById(R.id.mood1);
+        mood2 = rootView.findViewById(R.id.mood2);
+        mood3 = rootView.findViewById(R.id.mood3);
+        mood4 = rootView.findViewById(R.id.mood4);
+        mood5 = rootView.findViewById(R.id.mood5);
+
+        greetingText = rootView.findViewById(R.id.text_greeting);
+
+        addActivity = rootView.findViewById(R.id.text_add);
+        addNew = rootView.findViewById(R.id.add_new);
+
+        todayRecyclerView = rootView.findViewById(R.id.todayRecyclerView);
         todayRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         todayAdapter = new TodoAdapter(todayTodoList);
         todayRecyclerView.setAdapter(todayAdapter);
-        loadTodayTodos();
 
+        // 設定使用者暱稱
+        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String nickname = prefs.getString("nickname", "使用者");
+        greetingText.setText("Good Afternoon, " + nickname);
 
-        //add activity
-        addActivity = view.findViewById(R.id.text_add);
-        addNew = view.findViewById(R.id.add_new);
+        // 按鈕事件跳轉新增頁面
         addActivity.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddActivity.class);
             startActivity(intent);
@@ -103,20 +123,46 @@ public class home extends Fragment {
             startActivity(intent);
         });
 
-        // 找元件
-        noteDateText = view.findViewById(R.id.noteDateText);
-        noteContentText = view.findViewById(R.id.noteContentText);
-        mood1 = view.findViewById(R.id.mood1);
-        mood2 = view.findViewById(R.id.mood2);
-        mood3 = view.findViewById(R.id.mood3);
-        mood4 = view.findViewById(R.id.mood4);
-        mood5 = view.findViewById(R.id.mood5);
+        setupWeekCalendar();
+
+        loadTodayTodos();
+        loadEventsFromFirebase();
         loadTodayNote();
 
-        return view;
+        // 心情圖示與顏色對應
+        ImageView[] moods = {mood1, mood2, mood3, mood4, mood5};
+        String[] moodColors = {"#73BF00", "#FFD700", "#FF8000", "#FF0000", "#DDA0DD"};
+
+        for (int i = 0; i < moods.length; i++) {
+            final int index = i;
+            moods[i].setOnClickListener(v -> {
+                for (ImageView mood : moods) {
+                    mood.setColorFilter(null);
+                }
+                moods[index].setColorFilter(Color.parseColor(moodColors[index]));
+                selectedMoodColor = moodColors[index];
+                saveNoteData();
+            });
+        }
+
+        // 編輯框失去焦點時儲存筆記
+        noteContentText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                saveNoteData();
+            }
+        });
+
+        // 觸碰其他地方收鍵盤與取消焦點
+        rootView.setOnTouchListener((v, event) -> {
+            if (noteContentText.isFocused()) {
+                noteContentText.clearFocus();
+            }
+            return false;
+        });
+
+        return rootView;
     }
 
-    //get today do list
     private void loadTodayTodos() {
         Calendar startCal = Calendar.getInstance();
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -153,78 +199,228 @@ public class home extends Fragment {
                 });
     }
 
-
-    //get today note
     private void loadTodayNote() {
-        // 取得今天日期
-        String todayStr = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(new Date());
+        Date currentDate = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
+        String dateStr = sdf.format(currentDate);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("useremail", "使用者");
+
+        noteDateText.setText("隨手記 " + dateStr);
 
         db.collection("notes")
-                .whereEqualTo("date", todayStr)
+                .whereEqualTo("userEmail", userEmail)
+                .whereEqualTo("date", dateStr)
                 .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String noteTextValue = document.getString("text");
+                        String moodColor = document.getString("color");
+
+                        noteContentText.setText(noteTextValue);
+                        selectedMoodColor = moodColor;
+                        setMoodColor(moodColor);
+                    } else {
+                        noteContentText.setText("");
+                        selectedMoodColor = "#FFFFFF";
+                        setMoodColor(selectedMoodColor);
+                    }
+                })
+                .addOnFailureListener(Throwable::printStackTrace);
+    }
+
+    private void setMoodColor(String color) {
+        if (color != null) {
+            ImageView[] moods = {mood1, mood2, mood3, mood4, mood5};
+            String[] moodColors = {"#73BF00", "#FFD700", "#FF8000", "#FF0000", "#DDA0DD"};
+
+            for (ImageView mood : moods) {
+                mood.setVisibility(View.VISIBLE);
+                mood.setColorFilter(null);
+            }
+
+            for (int i = 0; i < moodColors.length; i++) {
+                if (moodColors[i].equalsIgnoreCase(color)) {
+                    moods[i].setColorFilter(Color.parseColor(color));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void saveNoteData() {
+        String noteText = noteContentText.getText().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
+        String dateStr = sdf.format(new Date());
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("useremail", "使用者");
+
+        if (selectedMoodColor == null) {
+            selectedMoodColor = "#FFFFFF";
+        }
+
+        db.collection("notes")
+                .whereEqualTo("userEmail", userEmail)
+                .whereEqualTo("date", dateStr)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!isAdded()) return;
+
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        String docId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        db.collection("notes").document(docId)
+                                .update("text", noteText, "color", selectedMoodColor)
+                                .addOnSuccessListener(aVoid -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        Note note = new Note(noteText, dateStr, selectedMoodColor, userEmail);
+                        db.collection("notes").add(note)
+                                .addOnSuccessListener(documentReference -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(), "儲存成功！", Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (!isAdded()) return;
+                    e.printStackTrace();
+                });
+    }
+
+    public static class Note {
+        private String text, date, color, userEmail;
+        public Note() {}
+        public Note(String text, String date, String color, String userEmail) {
+            this.text = text;
+            this.date = date;
+            this.color = color;
+            this.userEmail = userEmail;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (noteContentText != null) {
+            noteContentText.setOnFocusChangeListener(null);
+        }
+    }
+
+    private void setupWeekCalendar() {
+        String[] weekDayLabels = {"日", "一", "二", "三", "四", "五", "六"};
+
+        weekDaysLayout.removeAllViews();
+        weekDatesLayout.removeAllViews();
+        weekEventsLayout.removeAllViews();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        int todayWeekDay = calendar.get(Calendar.DAY_OF_WEEK); // 星期日=1
+        calendar.add(Calendar.DAY_OF_MONTH, -(todayWeekDay - Calendar.SUNDAY));
+
+        // 設定月份文字
+        Calendar todayCal = Calendar.getInstance();
+        SimpleDateFormat monthFormat = new SimpleDateFormat("yyyy年M月", Locale.getDefault());
+        String monthStr = monthFormat.format(todayCal.getTime());
+        monthTextView.setText(monthStr);
+        monthTextView.setTextColor(Color.BLACK);
+
+
+        for (int i = 0; i < 7; i++) {
+            TextView dayLabel = new TextView(getContext());
+            dayLabel.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            dayLabel.setGravity(Gravity.CENTER);
+            dayLabel.setTextSize(12);
+            dayLabel.setText(weekDayLabels[i]);
+            weekDaysLayout.addView(dayLabel);
+
+            TextView dateText = new TextView(getContext());
+            dateText.setLayoutParams(new LinearLayout.LayoutParams(0, dpToPx(32), 1));
+            dateText.setGravity(Gravity.CENTER);
+            dateText.setTextSize(12);
+
+            int dateOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+            dateText.setText(String.valueOf(dateOfMonth));
+
+            if (calendar.get(Calendar.YEAR) == todayCal.get(Calendar.YEAR)
+                    && calendar.get(Calendar.MONTH) == todayCal.get(Calendar.MONTH)
+                    && calendar.get(Calendar.DAY_OF_MONTH) == todayCal.get(Calendar.DAY_OF_MONTH)) {
+                dateText.setTextColor(Color.WHITE);
+                dateText.setBackgroundColor(Color.parseColor("#D59CAE"));
+            }
+
+            weekDatesLayout.addView(dateText);
+
+            LinearLayout dayEvents = new LinearLayout(getContext());
+            dayEvents.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            dayEvents.setOrientation(LinearLayout.VERTICAL);
+            weekEventsLayout.addView(dayEvents);
+
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
+
+    private void loadEventsFromFirebase() {
+        db.collection("schedules")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        QuerySnapshot querySnapshot = task.getResult();
-                        if (!querySnapshot.isEmpty()) {
-                            DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
-
-                            String content = doc.getString("text");
-                            Long mood = doc.getLong("color");
-                            String date = doc.getString("date");
-
-                            if (date != null) {
-                                // 顯示成「隨手記 2025年5月26號」格式
-                                try {
-                                    Date d = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).parse(date);
-                                    String displayDate = new SimpleDateFormat("yyyy年MM月dd號", Locale.getDefault()).format(d);
-                                    noteDateText.setText("隨手記 " + displayDate);
-                                } catch (Exception e) {
-                                    noteDateText.setText("隨手記 " + date);
-                                }
-                            } else {
-                                noteDateText.setText("隨手記");
+                        QuerySnapshot snapshot = task.getResult();
+                        if (snapshot != null) {
+                            for (QueryDocumentSnapshot doc : snapshot) {
+                                AddActivity.ScheduleData event = doc.toObject(AddActivity.ScheduleData.class);
+                                addEventToDay(event);
                             }
-
-                            if (content != null && !content.isEmpty()) {
-                                noteContentText.setText(content);
-                                noteContentText.setTextColor(getResources().getColor(android.R.color.black));
-                            } else {
-                                noteContentText.setText("寫點什麼吧……");
-                                noteContentText.setTextColor(0xFF888888);
-                            }
-
-                            // 顯示對應心情圖示
-                            if (mood != null) {
-                                switch (mood.intValue()) {
-                                    case 1:
-                                        mood1.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 2:
-                                        mood2.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 3:
-                                        mood3.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 4:
-                                        mood4.setVisibility(View.VISIBLE);
-                                        break;
-                                    case 5:
-                                        mood5.setVisibility(View.VISIBLE);
-                                        break;
-                                    default:
-                                        // 沒有合適心情，全部隱藏
-                                        break;
-                                }
-                            }
-
-                        } else {
-                            noteDateText.setText("隨手記 "+todayStr);
-                            noteContentText.setText("寫點什麼吧……");
                         }
-                    } else {
-                        Toast.makeText(getContext(), "讀取隨手記失敗", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
+    private void addEventToDay(AddActivity.ScheduleData event) {
+        if (getView() == null) return;
+
+        Calendar eventCal = Calendar.getInstance();
+        eventCal.setTime(event.getStartDateTime());
+
+        Calendar startOfWeek = Calendar.getInstance();
+        int dayOfWeek = startOfWeek.get(Calendar.DAY_OF_WEEK);
+        startOfWeek.add(Calendar.DAY_OF_MONTH, -(dayOfWeek - Calendar.SUNDAY));
+        startOfWeek.set(Calendar.HOUR_OF_DAY, 0);
+        startOfWeek.set(Calendar.MINUTE, 0);
+        startOfWeek.set(Calendar.SECOND, 0);
+        startOfWeek.set(Calendar.MILLISECOND, 0);
+
+        long diff = eventCal.getTimeInMillis() - startOfWeek.getTimeInMillis();
+        int dayIndex = (int) (diff / (24 * 60 * 60 * 1000));
+        if (dayIndex < 0 || dayIndex > 6) return; // 不在本週範圍內
+
+        LinearLayout dayEvents = (LinearLayout) weekEventsLayout.getChildAt(dayIndex);
+        if (dayEvents == null) return;
+
+        TextView eventText = new TextView(getContext());
+        eventText.setText(event.getTitle());
+        eventText.setTextColor(Color.BLACK);
+        eventText.setTextSize(10);
+        eventText.setMaxLines(1);
+        eventText.setEllipsize(android.text.TextUtils.TruncateAt.END);
+
+        dayEvents.addView(eventText);
+    }
+
 }
