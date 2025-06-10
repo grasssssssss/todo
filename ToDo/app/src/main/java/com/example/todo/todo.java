@@ -126,10 +126,16 @@ public class todo extends Fragment {
 
     private void loadPastTodos() {
         String today = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(new Date());
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date todayStart = cal.getTime(); // 今天凌晨
 
         FirebaseFirestore.getInstance()
                 .collection("activities")
-                .whereLessThan("startDate", today)
+                .whereLessThan("startDateTime", todayStart)
                 .whereEqualTo("done", false)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -150,10 +156,16 @@ public class todo extends Fragment {
         // 取得今天時間
         Calendar nowCal = Calendar.getInstance();
         Date now = nowCal.getTime();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date todayStart = cal.getTime(); // 今天凌晨
 
         FirebaseFirestore.getInstance()
                 .collection("activities")
-                .whereGreaterThan("startDateTime", now) // 活動是未來的
+                .whereGreaterThan("startDateTime", todayStart) // 活動是未來的
                 .whereEqualTo("done", false) // 還未完成
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
