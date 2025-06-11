@@ -435,7 +435,6 @@ public class home extends Fragment {
                 });
     }
 
-
     private void addEventToDay(AddActivity.ScheduleData event) {
         if (getView() == null) return;
 
@@ -469,6 +468,12 @@ public class home extends Fragment {
         int resolvedColor =  ContextCompat.getColor(requireContext(), colorId);
         eventText.setBackgroundColor(resolvedColor);
 
+        eventText.setOnClickListener(v -> {
+            Log.d("TEST", "eventId=" + event.getDocumentId());
+            Intent intent = new Intent(getActivity(), EditActivity.class);
+            intent.putExtra("documentId", event.getDocumentId());
+            startActivity(intent);
+        });
 
         dayEvents.addView(eventText);
     }

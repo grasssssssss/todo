@@ -46,6 +46,7 @@ public class EditActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         documentId = getIntent().getStringExtra("documentId");
+        Log.d("TEST", "EditActivity 接收到的 documentId=" + documentId);
 
         edTitle = findViewById(R.id.ed_title);
         edLocation = findViewById(R.id.ed_location);
@@ -81,10 +82,12 @@ public class EditActivity extends AppCompatActivity {
     }
 
     private void loadActivityData() {
+        Log.d("TEST", "loadActivityData() documentId=" + documentId);
         if (documentId == null) return;
 
         db.collection("activities").document(documentId).get()
                 .addOnSuccessListener(snapshot -> {
+                    Log.d("TEST", "snapshot.exists=" + snapshot.exists());
                     if (snapshot.exists()) {
                         AddActivity.ScheduleData data = snapshot.toObject(AddActivity.ScheduleData.class);
                         if (data != null) fillDataToViews(data);
