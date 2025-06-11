@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ import android.view.ContextThemeWrapper;
 
 
 public class home extends Fragment {
+    private static final String LOG_TAG = "HomeFragment"; //TEST
 
     private LinearLayout weekDaysLayout, weekDatesLayout, weekEventsLayout;
     private TextView monthTextView;
@@ -84,24 +86,40 @@ public class home extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        //View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        Log.d(LOG_TAG, "onCreateView 開始");
+        View rootView = null;
+        try {
+            rootView = inflater.inflate(R.layout.fragment_home, container, false);
+            Log.d(LOG_TAG, "已成功載入 fragment_home 佈局");
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "onCreateView inflate 發生錯誤", e);
+        }
 
         // 找元件
-        weekDaysLayout = rootView.findViewById(R.id.weekDaysLayout);
-        weekDatesLayout = rootView.findViewById(R.id.weekDatesLayout);
-        weekEventsLayout = rootView.findViewById(R.id.weekEventsLayout);
-        monthTextView = rootView.findViewById(R.id.monthTextView);
 
-        noteContentText = rootView.findViewById(R.id.noteContentText);
-        noteDateText = rootView.findViewById(R.id.noteDateText);
+        try {
+            weekDaysLayout = rootView.findViewById(R.id.weekDaysLayout);
+            weekDatesLayout = rootView.findViewById(R.id.weekDatesLayout);
+            weekEventsLayout = rootView.findViewById(R.id.weekEventsLayout);
+            monthTextView = rootView.findViewById(R.id.monthTextView);
 
-        mood1 = rootView.findViewById(R.id.mood1);
-        mood2 = rootView.findViewById(R.id.mood2);
-        mood3 = rootView.findViewById(R.id.mood3);
-        mood4 = rootView.findViewById(R.id.mood4);
-        mood5 = rootView.findViewById(R.id.mood5);
+            noteContentText = rootView.findViewById(R.id.noteContentText);
+            noteDateText = rootView.findViewById(R.id.noteDateText);
 
-        greetingText = rootView.findViewById(R.id.text_greeting);
+            mood1 = rootView.findViewById(R.id.mood1);
+            mood2 = rootView.findViewById(R.id.mood2);
+            mood3 = rootView.findViewById(R.id.mood3);
+            mood4 = rootView.findViewById(R.id.mood4);
+            mood5 = rootView.findViewById(R.id.mood5);
+
+            greetingText = rootView.findViewById(R.id.text_greeting);
+
+            Log.d(LOG_TAG, "已找到所有必要的 View 元件");
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "findViewById 發生錯誤", e);
+        }
+
 
         addActivity = rootView.findViewById(R.id.text_add);
         addNew = rootView.findViewById(R.id.add_new);
@@ -167,72 +185,84 @@ public class home extends Fragment {
     }
 
     private void loadTodayTodos() {
-        Calendar startCal = Calendar.getInstance();
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.SECOND, 0);
-        startCal.set(Calendar.MILLISECOND, 0);
-        Date startOfDay = startCal.getTime();
 
-        Calendar endCal = Calendar.getInstance();
-        endCal.set(Calendar.HOUR_OF_DAY, 23);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MILLISECOND, 999);
-        Date endOfDay = endCal.getTime();
+        Log.d(LOG_TAG, "載入今日待辦事項...");
+        try {
+            Calendar startCal = Calendar.getInstance();
+            startCal.set(Calendar.HOUR_OF_DAY, 0);
+            startCal.set(Calendar.MINUTE, 0);
+            startCal.set(Calendar.SECOND, 0);
+            startCal.set(Calendar.MILLISECOND, 0);
+            Date startOfDay = startCal.getTime();
 
-        db.collection("activities")
-                .whereGreaterThanOrEqualTo("startDateTime", startOfDay)
-                .whereLessThanOrEqualTo("startDateTime", endOfDay)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    todayTodoList.clear();
-                    int index = 0;
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
-                        item.setDocumentId(doc.getId());
-                        item.setOriginalOrder(index++);
-                        todayTodoList.add(item);
-                    }
-                    todayAdapter.sortList();
-                    todayAdapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "讀取今日代辦事項失敗", Toast.LENGTH_SHORT).show();
-                });
+            Calendar endCal = Calendar.getInstance();
+            endCal.set(Calendar.HOUR_OF_DAY, 23);
+            endCal.set(Calendar.MINUTE, 59);
+            endCal.set(Calendar.SECOND, 59);
+            endCal.set(Calendar.MILLISECOND, 999);
+            Date endOfDay = endCal.getTime();
+
+            db.collection("activities")
+                    .whereGreaterThanOrEqualTo("startDateTime", startOfDay)
+                    .whereLessThanOrEqualTo("startDateTime", endOfDay)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        todayTodoList.clear();
+                        int index = 0;
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            AddActivity.ScheduleData item = doc.toObject(AddActivity.ScheduleData.class);
+                            item.setDocumentId(doc.getId());
+                            item.setOriginalOrder(index++);
+                            todayTodoList.add(item);
+                        }
+                        todayAdapter.sortList();
+                        todayAdapter.notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "讀取今日代辦事項失敗", Toast.LENGTH_SHORT).show();
+                    });
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "loadTodayTodos 發生錯誤", e);
+        }
     }
 
     private void loadTodayNote() {
-        Date currentDate = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
-        String dateStr = sdf.format(currentDate);
 
-        SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
-        String userEmail = prefs.getString("useremail", "使用者");
+        Log.d(LOG_TAG, "載入note");
+        try {
+            Date currentDate = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.getDefault());
+            String dateStr = sdf.format(currentDate);
 
-        noteDateText.setText("隨手記 " + dateStr);
+            SharedPreferences prefs = requireContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+            String userEmail = prefs.getString("useremail", "使用者");
 
-        db.collection("notes")
-                .whereEqualTo("userEmail", userEmail)
-                .whereEqualTo("date", dateStr)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                        String noteTextValue = document.getString("text");
-                        String moodColor = document.getString("color");
+            noteDateText.setText("隨手記 " + dateStr);
 
-                        noteContentText.setText(noteTextValue);
-                        selectedMoodColor = moodColor;
-                        setMoodColor(moodColor);
-                    } else {
-                        noteContentText.setText("");
-                        selectedMoodColor = "#FFFFFF";
-                        setMoodColor(selectedMoodColor);
-                    }
-                })
-                .addOnFailureListener(Throwable::printStackTrace);
+            db.collection("notes")
+                    .whereEqualTo("userEmail", userEmail)
+                    .whereEqualTo("date", dateStr)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                            String noteTextValue = document.getString("text");
+                            String moodColor = document.getString("color");
+
+                            noteContentText.setText(noteTextValue);
+                            selectedMoodColor = moodColor;
+                            setMoodColor(moodColor);
+                        } else {
+                            noteContentText.setText("");
+                            selectedMoodColor = "#FFFFFF";
+                            setMoodColor(selectedMoodColor);
+                        }
+                    })
+                    .addOnFailureListener(Throwable::printStackTrace);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Note 發生錯誤", e);
+        }
     }
 
     private void setMoodColor(String color) {
