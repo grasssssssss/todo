@@ -68,6 +68,7 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
             holder.textView.setTextColor(Color.BLACK);
         }
 
+        //打勾+文字變化跟排序
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (holder.checkBox.isPressed()) {
                 item.setDone(isChecked);
@@ -75,6 +76,15 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 sortList();
                 notifyDataSetChanged();
             }
+        });
+
+        //跳轉編輯
+        holder.textView.setOnClickListener(v -> {
+            android.content.Context context = v.getContext();
+            android.content.Intent intent = new android.content.Intent(context, EditActivity.class);
+            // 把 documentId 傳給 EditActivity，讓它能讀取 Firestore 文件
+            intent.putExtra("documentId", item.getDocumentId());
+            context.startActivity(intent);
         });
     }
 
